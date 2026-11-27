@@ -88,6 +88,8 @@ env -u DISPLAY -u WAYLAND_DISPLAY \
     "$PWD/tests/smoke.js"
 ```
 
+To capture every redesigned module, run the same command with `tests/designShots.js` and set `NOVA_TEST_SCREENSHOTS` to an existing directory. Optional `NOVA_TEST_MODULES` limits the capture to a comma-separated module list.
+
 Set `SHELL_BACKGROUND_IMAGE` to an installed image if the example path is absent. The test prints a `PASS` line for each group of assertions and exits with an error if an assertion fails. To test Classic with this command, add `GNOME_SHELL_SESSION_MODE=classic` to the environment passed to `dbus-run-session`. To test media in Shell, run the same command with `tests/mediaSmoke.js`.
 
 For a manual test in a nested window, the Mutter development kit provides the windowed compositor backend. CachyOS packages it as `mutter-devkit`. With the bundle from the smoke-test instructions, start a nested Shell in its own data and settings directories.

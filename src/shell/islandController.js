@@ -6,12 +6,13 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {EventEmitter as EventBus} from 'resource:///org/gnome/shell/misc/signals.js';
 
-import {MODULES} from '../shared/studio.js';
+import {MODULES, MODULE_ICONS} from '../shared/studio.js';
 import {AnimationEngine} from './animationEngine.js';
 import {previewBounds} from './layoutEngine.js';
 import {PanelAdapter, PanelPlacement} from './panelAdapter.js';
 import {StateManager} from './stateManager.js';
 import {applyAppearance, applyPinnedStyle, contentAlignment} from './themeManager.js';
+import {Theme, Tooltip, rgbaCss} from './ui/kit.js';
 
 export class IslandController {
     #lifecycle;
@@ -28,6 +29,8 @@ export class IslandController {
     #expandedHost;
     #moduleButtons = new Map();
     #moduleTabs;
+    #dockScroll;
+    #tooltip;
     #openPreferences;
     #selectedModule;
     #trackSource = 0;
@@ -87,25 +90,43 @@ export class IslandController {
             this.#expandedHost.add_child(widget.expanded);
         }
         this.#expandedHost.y_expand = true;
-        const frame = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, clip_to_allocation: true});
+        this.#expandedHost.style_class = 'nova-frame-content';
+        const frame = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, clip_to_allocation: true,
+            style_class: 'nova-frame'});
         frame.add_child(this.#expandedHost);
-        this.#moduleTabs = new St.BoxLayout({name: 'nova-module-tabs', style_class: 'nova-module-tabs',
+
+        // Icon dock: one recognizable glyph per module, with tooltips instead of clipped labels.
+        this.#tooltip = new Tooltip(Main.layoutManager.uiGroup);
+        lifecycle.add(() => this.#tooltip.actor.destroy());
+        const dockWrap = new St.BoxLayout({name: 'nova-module-dock', style_class: 'nova-dock-wrap',
             x_align: Clutter.ActorAlign.CENTER});
-        frame.add_child(this.#moduleTabs);
+        this.#moduleTabs = new St.BoxLayout({name: 'nova-module-tabs', style_class: 'nova-dock'});
+        const dockScroll = new St.ScrollView({hscrollbar_policy: St.PolicyType.EXTERNAL,
+            vscrollbar_policy: St.PolicyType.NEVER, y_align: Clutter.ActorAlign.CENTER});
+        dockScroll.set_child(this.#moduleTabs);
+        this.#dockScroll = dockScroll;
+        dockWrap.add_child(dockScroll);
+        frame.add_child(dockWrap);
         for (const [id, label] of MODULES) {
-            const tab = new St.Button({name: `nova-module-${id}`, label, can_focus: true, reactive: true,
-                style_class: 'nova-module-tab'});
+            const tab = new St.Button({name: `nova-module-${id}`, accessible_name: label, can_focus: true,
+                reactive: true, style_class: 'nova-dock-item',
+                child: new St.Icon({icon_name: MODULE_ICONS[id] ?? 'application-x-addon-symbolic', icon_size: 16})});
             this.#moduleTabs.add_child(tab);
             this.#moduleButtons.set(id, tab);
+            this.#tooltip.attach(tab, label);
+            lifecycle.connect(tab, 'key-focus-in', () => this.#revealTab(tab));
             lifecycle.connect(tab, 'clicked', () => {
                 this.#selectedModule = id;
                 this.#onWidgetChanged();
             });
         }
+        const separator = new St.Widget({style_class: 'nova-dock-separator', y_expand: true});
+        dockWrap.add_child(separator);
         const preferences = new St.Button({name: 'nova-settings', accessible_name: 'NOVA Island Settings',
-            child: new St.Icon({icon_name: 'preferences-system-symbolic', icon_size: 16}),
-            reactive: true, can_focus: true, style_class: 'nova-module-tab'});
-        this.#moduleTabs.add_child(preferences);
+            child: new St.Icon({icon_name: 'emblem-system-symbolic', icon_size: 16}),
+            reactive: true, can_focus: true, style_class: 'nova-dock-item', y_align: Clutter.ActorAlign.CENTER});
+        this.#tooltip.attach(preferences, 'Settings');
+        dockWrap.add_child(preferences);
         lifecycle.connect(preferences, 'clicked', () => {
             this.#collapseImmediately();
             this.#openPreferences();
@@ -170,6 +191,15 @@ export class IslandController {
         lifecycle.connect(this.#button, 'clicked', () => this.#activate());
     }
 
+    #revealTab(tab) {
+        const adjustment = this.#dockScroll.hadjustment;
+        const {x1, x2} = tab.get_allocation_box();
+        if (x1 < adjustment.value)
+            adjustment.value = x1;
+        else if (x2 > adjustment.value + adjustment.page_size)
+            adjustment.value = x2 - adjustment.page_size;
+    }
+
     #activate() {
         this.#cancelCollapse();
         this.#cancelTrackTimer();
@@ -203,16 +233,18 @@ export class IslandController {
         }
     }
 
-    #trackPreview(id) {
+    #trackPreview(id, duration) {
         if (!this.#state.visible || this.#state.expanded || this.#panel.calendarOpen ||
-            !this.#settings.get('track-previews', false) ||
+            (id === 'media' && !this.#settings.get('track-previews', false)) ||
+            (id === 'notifications' && !this.#settings.get('notifications-auto-expand', true)) ||
             !this.#widgets.candidates(this.#instances, this.#settings, 'expanded').some(([key]) => key === id))
             return;
+        this.#cancelTrackTimer();
         this.#selectedModule = id;
         this.#updateWidgets();
         this.#state.hover();
         this.#trackSource = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT,
-            this.#settings.get('track-preview-duration', 3500), () => {
+            duration ?? this.#settings.get('track-preview-duration', 3500), () => {
                 this.#trackSource = 0;
                 if (!this.#state.pinned)
                     this.#state.collapse();
@@ -256,6 +288,7 @@ export class IslandController {
 
     #updateAppearance() {
         const tokens = this.#settings.appearance;
+        Theme.set(tokens);
         const alignment = contentAlignment(this.#settings.get('content-alignment', 'center'));
         for (const widget of this.#instances.values())
             widget.applyTheme?.(tokens, alignment);
@@ -270,11 +303,16 @@ export class IslandController {
         this.#expanded = selected?.[1] ?? null;
         for (const [id, tab] of this.#moduleButtons) {
             tab.visible = expanded.length > 1 && expanded.some(([key]) => key === id);
-            if (selected?.[0] === id)
+            if (selected?.[0] === id) {
                 tab.add_style_class_name('nova-media-selected');
-            else
+                tab.style = `background-color: ${rgbaCss(Theme.accent, 0.2)}; color: ${Theme.accent};`;
+            } else {
                 tab.remove_style_class_name('nova-media-selected');
+                tab.style = null;
+            }
         }
+        this.#dockScroll.visible = this.#moduleButtons.size > 0 && expanded.length > 1;
+        this.#dockScroll.get_parent().get_children()[1].visible = this.#dockScroll.visible;
         for (const widget of this.#instances.values()) {
             widget.compact.visible = widget === this.#compact;
             widget.expanded.visible = widget === this.#expanded;
@@ -287,9 +325,18 @@ export class IslandController {
     #onWidgetChanged(id, peek) {
         if (this.#shuttingDown || !this.#animation)
             return;
+        if (peek === 'close') {
+            this.#collapseImmediately();
+            return;
+        }
+        if (peek === 'preferences') {
+            this.#collapseImmediately();
+            this.#openPreferences();
+            return;
+        }
         this.#updateWidgets();
         if (peek)
-            this.#trackPreview(id);
+            this.#trackPreview(id, typeof peek === 'number' ? peek : undefined);
         this.#updateAccessibleName();
         this.#queueLayout();
     }
@@ -307,10 +354,18 @@ export class IslandController {
             'remote-artwork', 'visualizer-intensity', 'reduce-motion',
         ].includes(key))
             this.#instances.get('media')?.configure();
+        if (key.startsWith('notifications-'))
+            this.#instances.get('notifications')?.configure();
+        if (key.startsWith('productivity-') && !['productivity-state', 'productivity-focus-active'].includes(key))
+            this.#instances.get('productivity')?.configure();
+        for (const id of ['clipboard', 'emoji', 'screenshot', 'system-monitor', 'quick-settings']) {
+            if (key.startsWith(`${id}-`))
+                this.#instances.get(id)?.configure();
+        }
         if (key === 'track-previews' && this.#trackSource && !this.#settings.get('track-previews'))
             this.#collapseImmediately();
-        this.#updateWidgets();
         this.#updateAppearance();
+        this.#updateWidgets();
         this.#updateAccessibleName();
         this.#queueLayout();
     }
@@ -340,6 +395,19 @@ export class IslandController {
         if (this.#expanded?.lyricsOpen) {
             layout.expandedWidth = this.#settings.get('lyrics-width', 620);
             layout.expandedHeight = this.#settings.get('lyrics-height', 540);
+        } else if (this.#expanded?.fit) {
+            // Size to the module's content: the configured width is a floor and the
+            // configured height is a floor for the maximum before scrolling.
+            const {minWidth = 0, minHeight = 140, maxHeight = 520} = this.#expanded.fit;
+            const scale = this.#theme.scale_factor;
+            layout.expandedWidth = Math.max(layout.expandedWidth, minWidth);
+            // The surface carries an explicit animated size, so measure its child.
+            const node = this.#preview.get_theme_node();
+            const inner = node.adjust_for_width(layout.expandedWidth * scale);
+            const [, childNatural] = this.#preview.get_child().get_preferred_height(inner);
+            const [, natural] = node.adjust_preferred_height(childNatural, childNatural);
+            layout.expandedHeight = Math.max(minHeight,
+                Math.min(Math.ceil(natural / scale), Math.max(maxHeight, layout.expandedHeight)));
         }
         return previewBounds(workArea, top, anchorX + anchorWidth / 2, layout, this.#theme.scale_factor);
     }
@@ -386,8 +454,14 @@ export class IslandController {
 
         const target = this.#bounds();
         if (target && (!this.#previewTarget ||
-            Object.keys(target).some(key => target[key] !== this.#previewTarget[key])))
-            this.#render(false);
+            Object.keys(target).some(key => target[key] !== this.#previewTarget[key]))) {
+            if (this.#previewTarget && this.#preview.visible) {
+                this.#previewTarget = target;
+                this.#animation.resize(target);
+            } else {
+                this.#render(false);
+            }
+        }
     }
 
     #updateAccessibleName() {
@@ -414,6 +488,7 @@ export class IslandController {
 
         const expanded = this.#state.expanded;
         if (!expanded) {
+            this.#tooltip.hide();
             this.#cancelTrackTimer();
             if (this.#selectedModule) {
                 this.#selectedModule = null;
@@ -426,6 +501,9 @@ export class IslandController {
         else if (!animate || expanded !== Boolean(this.#previewTarget))
             this.#animation.present(target, button.width, expanded, animate);
         this.#previewTarget = expanded ? target : null;
+        // Content-fitted modules settle their size once styled and allocated.
+        if (expanded && this.#expanded?.fit)
+            this.#queueLayout();
 
         applyPinnedStyle(button, this.#state.pinned);
         applyPinnedStyle(this.#preview, this.#state.pinned);

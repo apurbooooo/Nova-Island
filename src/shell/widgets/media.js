@@ -10,6 +10,7 @@ import {ArtworkManager} from '../../media/artwork.js';
 import {LyricsProvider} from '../../media/lyrics.js';
 import {MediaManager} from '../../media/mpris.js';
 import {motionEnabled} from '../animationEngine.js';
+import {hexToRgb, inkFor, rgbaCss} from '../ui/kit.js';
 
 const SECOND = 1000000;
 const row = style_class => new St.BoxLayout({style_class});
@@ -70,8 +71,13 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
     expanded.y_align = Clutter.ActorAlign.FILL;
     expanded.x_align = Clutter.ActorAlign.FILL;
     const header = row('nova-media-header');
+    const source = row('nova-media-source');
+    source.x_expand = true;
+    const liveDot = new St.Widget({style_class: 'nova-media-live-dot', y_align: Clutter.ActorAlign.CENTER});
     const playerName = label('nova-media-player', 'nova-media-secondary');
-    playerName.x_expand = true;
+    playerName.y_align = Clutter.ActorAlign.CENTER;
+    source.add_child(liveDot);
+    source.add_child(playerName);
     const switchPlayer = action('nova-media-switch', 'Switch media player', 'object-flip-horizontal-symbolic', () => {
         const players = manager?.players ?? [];
         if (players.length < 2)
@@ -80,7 +86,8 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
         settings.set('last-player', players[selected].name);
     });
     const lyricToggle = new St.Button({name: 'nova-media-lyrics', label: 'Lyrics',
-        style_class: 'nova-media-action', can_focus: true, reactive: true});
+        style_class: 'nova-media-action nova-media-pill', can_focus: true, reactive: true,
+        y_align: Clutter.ActorAlign.CENTER});
     lyricToggle.connect('clicked', () => {
         showLyrics = !showLyrics;
         if (showLyrics && lyricsResult?.retry)
@@ -89,19 +96,19 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
         updateTimers();
         onChanged(false);
     });
-    [playerName, switchPlayer, lyricToggle].forEach(child => header.add_child(child));
+    [source, switchPlayer, lyricToggle].forEach(child => header.add_child(child));
     expanded.add_child(header);
 
     const main = column('nova-media-main');
     main.x_expand = true;
     const hero = row('nova-media-hero');
-    const large = art(100, 'nova-media-art');
+    const large = art(132, 'nova-media-art');
     const info = column('nova-media-info');
     info.x_expand = true;
     info.y_align = Clutter.ActorAlign.CENTER;
     const title = label('nova-media-title', 'nova-media-title');
-    const artist = label('nova-media-artist', 'nova-media-secondary');
-    const album = label('nova-media-album', 'nova-media-secondary');
+    const artist = label('nova-media-artist', 'nova-media-artist');
+    const album = label('nova-media-album', 'nova-media-album');
     [title, artist, album].forEach(child => info.add_child(child));
     [large.image, info].forEach(child => hero.add_child(child));
     main.add_child(hero);
@@ -127,10 +134,23 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
     lifecycle.connect(progress, 'repaint', area => {
         const [width, height] = area.get_surface_size();
         const context = area.get_context();
-        const filled = width * fraction;
+        const radius = height / 2;
         const rtl = area.get_text_direction() === Clutter.TextDirection.RTL;
+        const pill = (x, w) => {
+            if (w <= 0)
+                return;
+            const r = Math.min(radius, w / 2);
+            context.newSubPath();
+            context.arc(x + w - r, radius, r, -Math.PI / 2, Math.PI / 2);
+            context.arc(x + r, radius, r, Math.PI / 2, 1.5 * Math.PI);
+            context.closePath();
+        };
+        context.setSourceRGBA(1, 1, 1, 0.14);
+        pill(0, width);
+        context.fill();
+        const filled = Math.max(fraction > 0 ? height : 0, width * fraction);
         context.setSourceRGB(...progressColor);
-        context.rectangle(rtl ? width - filled : 0, 0, filled, height);
+        pill(rtl ? width - filled : 0, filled);
         context.fill();
         context.$dispose();
     });
@@ -144,8 +164,17 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
     const controlsScroll = new St.ScrollView({x_expand: true, hscrollbar_policy: St.PolicyType.AUTOMATIC,
         vscrollbar_policy: St.PolicyType.NEVER});
     controlsScroll.set_child(controls);
-    [progress, times, controlsScroll].forEach(child => main.add_child(child));
-    const playerScroll = new St.ScrollView({x_expand: true, y_expand: true,
+    lifecycle.connect(controlsScroll, 'notify::allocation', () => {
+        const policy = controlsScroll.width < 380 ? St.PolicyType.AUTOMATIC : St.PolicyType.NEVER;
+        if (controlsScroll.hscrollbar_policy !== policy)
+            controlsScroll.hscrollbar_policy = policy;
+    });
+    const timeline = column('nova-media-timeline');
+    timeline.add_child(progress);
+    timeline.add_child(times);
+    main.add_child(timeline);
+    main.add_child(controlsScroll);
+    const playerScroll = new St.ScrollView({x_expand: true, y_expand: true, overlay_scrollbars: true,
         hscrollbar_policy: St.PolicyType.NEVER, vscrollbar_policy: St.PolicyType.AUTOMATIC});
     playerScroll.set_child(main);
     expanded.add_child(playerScroll);
@@ -293,7 +322,7 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
     function updateArtwork() {
         const enabled = settings.get('media-artwork', true);
         const allowRemote = settings.get('remote-artwork', true);
-        const size = settings.get('artwork-size', 100);
+        const size = settings.get('artwork-size', 132);
         large.image.set_size(size, size);
         large.fallback.icon_size = Math.round(size * 0.42);
         small.image.visible = large.image.visible = enabled;
@@ -360,6 +389,7 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
         album.visible = Boolean(track.album);
         const status = active?.status ?? 'Stopped';
         playerName.text = active ? `${active.identity} · ${status}` : 'No media player';
+        liveDot.opacity = playing ? 255 : 90;
         switchPlayer.visible = (manager?.players.length ?? 0) > 1;
         if (switchPlayer.visible)
             switchPlayer.accessible_name = `Switch player · ${active.identity}`;
@@ -410,6 +440,7 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
         const stacked = settings.get('media-expanded-layout', 'wide') === 'stacked';
         hero.orientation = stacked ? Clutter.Orientation.VERTICAL : Clutter.Orientation.HORIZONTAL;
         hero.x_align = stacked ? Clutter.ActorAlign.CENTER : Clutter.ActorAlign.FILL;
+        info.x_align = stacked ? Clutter.ActorAlign.CENTER : Clutter.ActorAlign.FILL;
         updateArtwork();
         updateTimers();
     }
@@ -453,15 +484,23 @@ export function createMediaWidget(lifecycle, onChanged, settings) {
         applyTheme(tokens, alignment) {
             compact.style = `spacing: ${Math.min(8, tokens['compact-spacing'])}px;`;
             expanded.style = `spacing: ${tokens['expanded-spacing']}px;`;
-            for (const secondary of [artist, album, playerName, elapsed, duration])
+            for (const secondary of [album, elapsed, duration])
                 secondary.style = `color: ${tokens['secondary-text-color']};`;
+            playerName.style = `color: ${rgbaCss(tokens['text-color'], 0.62)};`;
+            artist.style = `color: ${tokens['accent-color']};`;
+            liveDot.style = `background-color: ${tokens['accent-color']};`;
+            play.style = `background-color: ${tokens['accent-color']}; color: ${inkFor(tokens['accent-color'])};`;
+            lyricToggle.style = `background-color: ${rgbaCss(tokens['accent-color'], 0.14)}; color: ${tokens['accent-color']};`;
+            // Beside artwork text reads best start-aligned; stacked follows the setting.
+            const stacked = settings.get('media-expanded-layout', 'wide') === 'stacked';
             for (const actor of [title, artist, album])
-                actor.x_align = alignment;
+                actor.x_align = stacked ? alignment : Clutter.ActorAlign.START;
             title.style = `font-size: ${settings.get('media-title-size', 22)}px;`;
             artist.style += ` font-size: ${settings.get('media-artist-size', 15)}px;`;
-            main.style = hero.style = `spacing: ${tokens['expanded-spacing']}px;`;
+            main.style = `spacing: ${tokens['expanded-spacing']}px;`;
+            hero.style = `spacing: ${tokens['expanded-spacing'] + 12}px;`;
             const accent = tokens['accent-color'];
-            progressColor = accent.slice(1).match(/../g).map(pair => parseInt(pair, 16) / 255);
+            progressColor = hexToRgb(accent);
             if (progress.mapped)
                 progress.queue_repaint();
             bars.forEach(actor => actor.style = `background-color: ${accent};`);

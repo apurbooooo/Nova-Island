@@ -67,3 +67,51 @@ Artwork decode was exercised with PNG. JPEG and WebP acceptance depend on the in
 | GNOME Shell visual check | The 51.1 isolated Wayland compositor rendered the 620 × 540 panel with a synthetic track. Its screenshot shows the centered line, active word, surrounding lines and navigation. The Shell suites exercised the native panel, clock, media, seeking, plain text, reduced motion and disable cleanup. The active desktop extension was left installed at its previous version. |
 
 The 32 ms refresh interval governs visual sampling. Player timestamp accuracy, recording/version matching, display scheduling and audio output latency affect what the listener sees and hears. The tests measure cue selection and clock interpolation. [Compositor capture](karaoke-preview.png) · [LRCLIB API](https://lrclib.net/docs)
+
+## Notifications foundation on 27 November 2026
+
+The installed Shell reports 51.1. Its notification JavaScript was not installed as loose files, so the matching [GNOME Shell 51.1 source](https://github.com/GNOME/gnome-shell/blob/51.1/js/ui/messageTray.js) was used to verify `source-added`, `source-removed`, `notification-added`, `getSources()`, source policy, and urgency values. The installed desktop notification schema provides the global banner setting. NOVA listens to those signals and retains only source names and titles while enabled and unlocked.
+
+| Check | Result |
+| --- | --- |
+| Automated Shell integration | An isolated GNOME Shell 51.1 run passed incoming preview, configured peek duration, Do Not Disturb, Focus Mode critical priority, 20-item history bound, local clearing, lock hiding, and disable cleanup. |
+| Existing Shell regression | The standard Shell smoke suite passed all existing groups after the module was added. |
+| Real desktop applications | **UNVERIFIED.** The integration check used synthetic Shell notifications. Application-specific privacy, banner policy, and accessibility need active-desktop checks. |
+
+Reproduce with the extension bundle and `tests/notificationsSmoke.js` using the headless Wayland command in the README. Enable Notifications in the Modules preferences. NOVA's Do Not Disturb and Focus Mode govern NOVA previews only. Native GNOME banners and the notification list continue to use their own policies. NOVA clears its session history on disable and lock.
+
+## Productivity foundation on 27 November 2026
+
+| Check | Actual result |
+| --- | --- |
+| Pure timing model | `gjs -m tests/productivity.js` passed exact elapsed calculations, pause/resume, one completion, focus/break transitions, lap persistence, paused recovery, reset, and malformed snapshot rejection. The clock was injected and simulated. |
+| Shell integration | `tests/productivitySmoke.js` passed calendar actor creation, UTC world-clock display, stopwatch timing, countdown completion, focus activation/pause, module disable, extension disable/re-enable, and preserved paused state in isolated GNOME Shell 51.1 Wayland. |
+| Regressions | Studio, media service, media Shell, notification Shell, and standard Shell smoke suites passed with Productivity present. |
+| Real calendar events | **UNVERIFIED.** CalendarServer cannot start on this host because libecal-2.0.so.3 is missing. The view reports unavailable events. |
+| Physical suspend/resume | **UNVERIFIED.** Timers use Linux monotonic awake time, which excludes suspend. Hardware sleep was not induced. |
+| Active desktop visual and accessibility inspection | **UNVERIFIED.** Tests used an isolated compositor and programmatic actor assertions. |
+
+Run `gjs -m tests/productivity.js` for timing tests. Use the README's isolated Shell packaging command with `tests/productivitySmoke.js` for integration. Enable Productivity in Modules, choose it as the default expanded module or use its tab, then select Calendar, World, Stopwatch, Timer, or Focus. Configure IANA zones and interval lengths on the Productivity preferences page. Reset applies a new duration to an existing countdown.
+
+For desktop verification, use a calendar with known events, navigate between dates and months, and compare selected-day summaries with GNOME Calendar. Start a stopwatch and countdown, suspend the machine, then confirm they advance only by awake time. Restart Shell or log back in and confirm saved timers open paused. Exercise focus pause, break completion, native DND, keyboard navigation, and large text. Alerts require an enabled extension and running Shell. Persistent alarms across logout/reboot require a future companion service.
+
+## Desktop Tools foundation on 27 November 2026
+
+All five tools are disabled by default. Enable them in Modules. Clipboard additionally requires the explicit Capture clipboard switch in Desktop Tools preferences. Clipboard history stays in memory and is cleared on lock, capture off, module disable, or extension disable. Pinned entries expire only through hard limits or clearing. Sensitive-content filtering is heuristic and cannot guarantee exclusion of every secret.
+
+| Evidence | Actual result |
+| --- | --- |
+| Automated module logic | `gjs -m tests/desktopTools.js` passed clipboard pin/limit/expiry/search/filter rules, image de-duplication, emoji search/recents, CPU/memory/network calculations and resets, cancelled I/O, and mock portal success, cancellation, refusal, and unavailable-service handling. |
+| Shell 51.1 Wayland integration | `tests/desktopToolsSmoke.js` passed capture opt-in, real compositor text/PNG transfers using synthetic clipboard items, PRIMARY exclusion, sensitive-text filtering, search/clear, offline emoji copying, real procfs sampling, native Quick Settings menu open/close, screenshot selector open/cancel, lock hiding, and extension disable/re-enable cleanup. |
+| Regression suites | Studio, media services, Productivity model, Notifications Shell, Productivity Shell, Media Shell, and standard Shell suites passed with all five factories registered. JavaScript syntax, schema compilation, and diff whitespace checks passed. |
+| Isolated compositor visual inspection | Emoji and System Monitor captures were inspected. The monitor displayed live CPU, memory, network, thermal-zone and BAT0 capacity values from the host kernel. This was an isolated compositor view. |
+| Real desktop verification | **UNVERIFIED.** Target-application paste, actual capture/export, interactive portal save, screen recording output, Wi-Fi/Bluetooth device operations, audio/display changes, Night Light, lock/power confirmation, assistive technologies, and localized layouts were not exercised on the active desktop. |
+| GPU and other hardware | **UNVERIFIED** on other drivers and hardware. GPU utilization is shown only for readable DRM `gpu_busy_percent` counters. Missing sensors and unavailable volume/brightness are omitted. |
+
+The emoji collection is an offline subset with symbols and kaomoji. Selection copies text for an explicit paste into the destination application. Arbitrary typing into other Wayland applications is outside this implementation. Clipboard history has configurable local session retention and no disk persistence. System Monitor aggregates all non-loopback network interfaces, including virtual interfaces.
+
+Screenshot Studio delegates full-screen/window/area choice to GNOME. Recording remains in GNOME's native UI, with screen/area support according to the backend. Shell 51.1's window-recording path is unsupported. Screenshot Save a copy uses the file chooser portal and Copy image uses the last explicitly requested capture. Actual portal selection and export remain UNVERIFIED, and cancellation/service failure are covered using a mocked transport. Shell's native recording indicator and stop action remain responsible for an ongoing recording after NOVA is disabled.
+
+To reproduce automated checks, run `gjs -m tests/desktopTools.js`. For integration, use the README's isolated Wayland packaging command with `tests/desktopToolsSmoke.js`. Optional `NOVA_TEST_SCREENSHOTS` captures the test Emoji and System Monitor views to an existing directory. The test uses synthetic clipboard payloads and native selectors, cancels capture, and avoids changing hardware settings.
+
+For real desktop verification, first enable the desired tools. Copy ordinary text and a PNG, search, pin/unpin, select to restore, clear, then lock/unlock and confirm history is empty. Test password-manager secret hints and custom exclusions with disposable test values. Search an emoji, navigate with Down/Tab/Enter, and paste in a text application. In Screenshot Studio, explicitly select each capture mode and test cancellation, clipboard output, local Save a copy, recording indicators, and Stop. Check native DND and lockdown policies. Compare monitor readings with a system tool and test devices appearing/disappearing. Open Wi-Fi/Bluetooth controls and test pairing/authentication, then verify volume, available brightness, Night Light, Lock, and the native power confirmation dialog. Check narrow layouts, large text, reduced motion, and screen-reader labels. These manual checks remain open in the roadmap.

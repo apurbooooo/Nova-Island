@@ -1,10 +1,14 @@
 {
   "uuid": "nova-island@fromapurbo",
   "name": "NOVA Island",
-  "description": "A customizable top-bar clock and media controller for GNOME Shell.",
-  "shell-version": ["51"],
-  "version": 6,
-  "version-name": "0.3.2",
+  "description": "A premium Dynamic Island for GNOME Shell: clock, media and lyrics, notifications, productivity, clipboard, emoji, screenshots, system monitor, and quick settings.",
+  "shell-version": [
+    "51"
+  ],
+  "version": 9,
+  "version-name": "0.5.0",
   "settings-schema": "org.gnome.shell.extensions.nova-island",
-  "session-modes": ["user"]
+  "session-modes": [
+    "user"
+  ]
 }

@@ -1,10 +1,12 @@
+import Adw from 'gi://Adw?version=1';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
+import {addModuleControls} from '../src/prefs/moduleControls.js';
 import {exportPresetFile, importPresetFile} from '../src/prefs/presetControls.js';
 
 import {applyPreset, listPresets, parsePreset, savePreset, snapshot, writeSettings} from '../src/shared/presets.js';
-import {readAppearance, surfaceStyle, THEMES, THEME_TOKENS} from '../src/shared/studio.js';
+import {MODULES, readAppearance, surfaceStyle, THEMES, THEME_TOKENS} from '../src/shared/studio.js';
 
 const settings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.nova-island'});
 function assert(condition, message) {
@@ -44,6 +46,37 @@ for (const invalid of [
 }
 assert(settings.get_int('compact-width') === baseline.settings['compact-width'], 'A rejected preset changed settings');
 print('PASS built-in themes, all appearance tokens, persisted preset and JSON round trip, invalid import rejection');
+
+Adw.init();
+const prefsWindow = new Adw.PreferencesWindow();
+const modulesPage = new Adw.PreferencesPage({title: 'Modules'});
+prefsWindow.add(modulesPage);
+const sections = addModuleControls(modulesPage, settings, prefsWindow);
+assert(sections.length === MODULES.length, 'Preferences did not build all registered module groups');
+assert(sections.map(({id}) => id).join(',') === MODULES.map(([id]) => id).join(','),
+    'Preferences module groups are missing or out of registry order');
+for (const {id, title, section, enabled, compact, expanded, priority} of sections) {
+    assert(section.title === title, `${id} group title was not rendered`);
+    assert(enabled?.title === `Enable ${title}` && compact?.title === 'Show in compact view' &&
+        expanded?.title === 'Show in expanded view' && priority?.title === 'Display priority',
+    `${id} preference rows were not constructed`);
+    for (const [row, suffix] of [[enabled, 'enabled'], [compact, 'compact'], [expanded, 'expanded']]) {
+        const key = `${id}-${suffix}`;
+        const initial = settings.get_boolean(key);
+        row.active = !initial;
+        assert(settings.get_boolean(key) === !initial, `${id} ${suffix} control did not update its setting`);
+        row.active = initial;
+    }
+    const priorityKey = `${id}-priority`;
+    const initialPriority = settings.get_int(priorityKey);
+    const [, range] = settings.settings_schema.get_key(priorityKey).get_range().deepUnpack();
+    const [minimum, maximum] = range.deepUnpack();
+    priority.value = initialPriority < maximum ? initialPriority + 1 : minimum;
+    assert(settings.get_int(priorityKey) === priority.value, `${id} priority control did not update its setting`);
+    settings.set_int(priorityKey, initialPriority);
+}
+prefsWindow.close();
+print('PASS Modules preferences construct all nine groups and bind every module control');
 
 const [descriptor, path] = GLib.file_open_tmp('nova-preset-XXXXXX');
 GLib.close(descriptor);

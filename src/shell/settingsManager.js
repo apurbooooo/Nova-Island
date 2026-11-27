@@ -15,6 +15,10 @@ export class SettingsManager {
         return this.#settings.settings_schema.has_key(key) && this.#settings.set_string(key, value);
     }
 
+    setBoolean(key, value) {
+        return this.#settings.settings_schema.has_key(key) && this.#settings.set_boolean(key, value);
+    }
+
     get appearance() {
         return readAppearance(this.#settings);
     }
