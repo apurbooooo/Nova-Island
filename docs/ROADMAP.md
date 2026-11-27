@@ -22,16 +22,20 @@
 - [x] Ship the 0.3.2 karaoke view with word, line and plain modes, manual navigation, live settings and compositor coverage.
 - [ ] Compare audible lyrics against a matching word-timed recording during real Spotify playback.
 - [ ] Broaden coverage to Firefox and Spotify after VLC and Brave verification, and investigate an audio-data visualizer.
-- [ ] **Notifications.** Verify Shell notification hooks, then build the notification manager, previews, bounded history, configurable peek duration and automatic expansion, priority rules, Do Not Disturb, and focus mode. Respect Shell privacy and lock-screen state.
-- [ ] **Productivity.** Add calendar, world clocks, stopwatch, countdown, Pomodoro, and focus sessions. Use monotonic time for elapsed timers. Add persistent alarms through the companion service and recover scheduled alarms after session restarts.
+- [x] **Notifications foundation.** Verify Shell 51.1 source and tray signals, add opt-in previews, 20-item session history, configurable peek duration, priority rules, NOVA Do Not Disturb and Focus Mode, local dismissal, and lock-screen clearing. Cover these paths in an isolated Shell 51.1 session.
+- [ ] **Notifications desktop verification.** Exercise real application notifications, accessibility, and privacy behavior in the active desktop before calling the module complete.
+- [x] **Productivity foundation.** Add calendar navigation, event-source integration, configurable world clocks, stopwatch with laps, countdown completion alerts, focus/break intervals, and NOVA Focus Mode integration. Verify monotonic timing, paused recovery, and isolated Shell lifecycle checks.
+- [ ] **Productivity desktop verification.** Verify real calendar events, physical suspend/resume, localized layouts, accessibility, and long sessions on the active desktop. These checks remain UNVERIFIED.
+- [ ] **Persistent alarms.** Design and verify a companion service before promising delivery while logged out or after reboot.
 
 ## Milestone 3 · Desktop tools
 
-- [ ] **Clipboard.** Validate user-authorized Wayland clipboard APIs before offering history. Add searchable, pinnable text and images, local retention controls, and sensitive-content filtering. Keep capture opt-in and expose a clear-off switch and history deletion.
-- [ ] **Emoji.** Add an offline searchable picker for emoji, symbols, and kaomoji, with local recent items.
-- [ ] **Screenshot Studio.** Use Shell or XDG Desktop Portal consent flows for fullscreen, window, and area capture and recording where supported. Add user-directed clipboard export and save location.
-- [ ] **System monitor.** Add CPU, memory, GPU, temperature, battery, network rates, volume, and brightness. Subscribe to service signals where possible and sample counters only while needed. Omit unavailable sensors gracefully.
-- [ ] **Quick settings.** Add Wi-Fi, Bluetooth, audio, brightness, Night Light, lock, and power using supported interfaces. Reflect unavailable features and preserve authentication or confirmation where the platform requires it.
+- [x] **Clipboard foundation.** Add opt-in Wayland CLIPBOARD capture, session-local searchable text/PNG history, pins, item/byte/age limits, secret hints and text exclusions, clear/delete, cancellation, and lock/disable cleanup. Verify transfers in isolated Shell 51.1.
+- [x] **Emoji foundation.** Add a curated offline collection of emoji, symbols, and kaomoji, search, keyboard selection, clipboard insertion workflow, and persisted recent items.
+- [x] **Screenshot Studio foundation.** Open native GNOME screenshot/recording selectors, retain an explicitly requested capture for clipboard export, and implement Save a copy through the file chooser portal. Verify selector cancellation and mock portal responses.
+- [x] **System monitor foundation.** Sample CPU, memory, network, and available Linux temperature/battery/GPU counters asynchronously while visible. Read native volume and brightness when available.
+- [x] **Quick Settings foundation.** Expose native device-menu access, audio/volume, available brightness and Night Light, lock, and the native power confirmation path. Verify native menu opening in isolated Shell 51.1.
+- [ ] **Desktop Tools verification.** Verify interactive screenshot export and recording, portal file selection, target-app paste, radio and display controls, power confirmation, screen readers, localization, and other GPU/sensor drivers on the active desktop. These paths remain UNVERIFIED.
 
 ## Milestone 4 · Customization Studio
 

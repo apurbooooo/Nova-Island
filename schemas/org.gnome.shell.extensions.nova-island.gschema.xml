@@ -205,10 +205,27 @@
         <choice value="auto"/>
         <choice value="clock"/>
         <choice value="media"/>
+        <choice value="notifications"/>
+        <choice value="productivity"/>
+        <choice value="clipboard"/>
+        <choice value="emoji"/>
+        <choice value="screenshot"/>
+        <choice value="system-monitor"/>
+        <choice value="quick-settings"/>
       </choices>
       <default>'auto'</default>
       <summary>Default expanded module</summary>
     </key>
+
+    <key name="notifications-enabled" type="b"><default>false</default></key>
+    <key name="notifications-compact" type="b"><default>true</default></key>
+    <key name="notifications-expanded" type="b"><default>true</default></key>
+    <key name="notifications-priority" type="i"><range min="0" max="100"/><default>40</default></key>
+    <key name="notifications-auto-expand" type="b"><default>true</default></key>
+    <key name="notifications-peek-duration" type="i"><range min="500" max="15000"/><default>3500</default></key>
+    <key name="notifications-minimum-urgency" type="i"><range min="1" max="3"/><default>1</default></key>
+    <key name="notifications-dnd" type="b"><default>false</default></key>
+    <key name="notifications-focus-mode" type="b"><default>false</default></key>
 
     <key name="media-expanded-layout" type="s">
       <choices><choice value="wide"/><choice value="stacked"/></choices>
@@ -247,7 +264,7 @@
     </key>
     <key name="artwork-size" type="i">
       <range min="36" max="160"/>
-      <default>100</default>
+      <default>132</default>
       <summary>Artwork size</summary>
     </key>
     <key name="media-control-size" type="i">
@@ -359,5 +376,41 @@
       <default>'slide'</default>
       <summary>Lyrics transition</summary>
     </key>
+      <key name="productivity-enabled" type="b"><default>false</default></key>
+    <key name="productivity-compact" type="b"><default>true</default></key>
+    <key name="productivity-expanded" type="b"><default>true</default></key>
+    <key name="productivity-priority" type="i"><range min="0" max="100"/><default>35</default></key>
+    <key name="productivity-countdown" type="i"><range min="1" max="86400"/><default>300</default></key>
+    <key name="productivity-focus-minutes" type="i"><range min="1" max="180"/><default>25</default></key>
+    <key name="productivity-break-minutes" type="i"><range min="1" max="60"/><default>5</default></key>
+    <key name="productivity-timezones" type="as"><default>['UTC', 'Asia/Dhaka']</default></key>
+    <key name="productivity-state" type="s"><default>'{}'</default></key>
+    <key name="productivity-focus-active" type="b"><default>false</default></key>
+    <key name="clipboard-enabled" type="b"><default>false</default></key>
+    <key name="clipboard-compact" type="b"><default>false</default></key>
+    <key name="clipboard-expanded" type="b"><default>true</default></key>
+    <key name="clipboard-priority" type="i"><range min="0" max="100"/><default>30</default></key>
+    <key name="emoji-enabled" type="b"><default>false</default></key>
+    <key name="emoji-compact" type="b"><default>false</default></key>
+    <key name="emoji-expanded" type="b"><default>true</default></key>
+    <key name="emoji-priority" type="i"><range min="0" max="100"/><default>30</default></key>
+    <key name="screenshot-enabled" type="b"><default>false</default></key>
+    <key name="screenshot-compact" type="b"><default>false</default></key>
+    <key name="screenshot-expanded" type="b"><default>true</default></key>
+    <key name="screenshot-priority" type="i"><range min="0" max="100"/><default>30</default></key>
+    <key name="system-monitor-enabled" type="b"><default>false</default></key>
+    <key name="system-monitor-compact" type="b"><default>false</default></key>
+    <key name="system-monitor-expanded" type="b"><default>true</default></key>
+    <key name="system-monitor-priority" type="i"><range min="0" max="100"/><default>30</default></key>
+    <key name="quick-settings-enabled" type="b"><default>false</default></key>
+    <key name="quick-settings-compact" type="b"><default>false</default></key>
+    <key name="quick-settings-expanded" type="b"><default>true</default></key>
+    <key name="quick-settings-priority" type="i"><range min="0" max="100"/><default>30</default></key>
+    <key name="clipboard-capture" type="b"><default>false</default></key>
+    <key name="clipboard-limit" type="i"><range min="1" max="100"/><default>30</default></key>
+    <key name="clipboard-retention" type="i"><range min="1" max="1440"/><default>30</default></key>
+    <key name="clipboard-exclusions" type="as"><default>[]</default></key>
+    <key name="emoji-recent" type="s"><default>'[]'</default></key>
+    <key name="system-monitor-interval" type="i"><range min="1" max="30"/><default>2</default></key>
   </schema>
 </schemalist>

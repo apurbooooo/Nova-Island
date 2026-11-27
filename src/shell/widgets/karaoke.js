@@ -41,16 +41,21 @@ export class KaraokeView {
         body.add_child(this.message);
         this.scroll.set_child(body);
         this.nav = new St.BoxLayout({x_align: Clutter.ActorAlign.CENTER, style_class: 'nova-lyrics-nav'});
-        for (const [name, label, step] of [['Previous lyric line', '↑', -1], ['Return to current line', 'Current', 0],
-            ['Next lyric line', '↓', 1]]) {
-            const button = new St.Button({label, accessible_name: name, can_focus: true,
-                style_class: 'nova-media-action'});
+        for (const [name, iconName, step] of [['Previous lyric line', 'go-up-symbolic', -1],
+            ['Return to current line', null, 0], ['Next lyric line', 'go-down-symbolic', 1]]) {
+            const button = new St.Button({accessible_name: name, can_focus: true, reactive: true,
+                style_class: iconName ? 'nova-media-action' : 'nova-media-action nova-media-pill'});
+            if (iconName)
+                button.child = new St.Icon({icon_name: iconName, icon_size: 14});
+            else
+                button.label = 'Now playing';
             button.connect('clicked', () => this.navigate(step));
             this.nav.add_child(button);
         }
         for (const actor of [this.heading, this.stage, this.scroll, this.nav])
             this.actor.add_child(actor);
         this.stage.connect('notify::width', () => this.paint(true));
+        this.stage.connect('notify::height', () => this.paint(true));
         this.configure();
     }
 
@@ -153,9 +158,10 @@ export class KaraokeView {
                 if (!cue)
                     continue;
                 const selected = index === active;
-                row.style = `font-size: ${selected ? this.currentSize : this.otherSize}px; font-weight: ${selected ? 700 : 500}; color: ${selected ? this.currentColor : '#e6ebf2'};`;
+                row.style = `font-size: ${selected ? this.currentSize : this.otherSize}px; font-weight: ${selected ? 800 : 500}; color: ${selected ? this.currentColor : '#e6ebf2'};`;
                 row.text = cue.text || '♪';
-                heights[index - center + 2] = row.get_preferred_height(Math.max(1, this.stage.width))[1];
+                const width = this.stage.has_allocation() ? this.stage.get_allocation_box().get_width() : this.stage.width;
+                heights[index - center + 2] = row.get_preferred_height(Math.max(1, width))[1];
                 visible.push([index, row, selected]);
             }
             for (const [index, row, selected] of visible) {
