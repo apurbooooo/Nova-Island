@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=NOVA Island Settings
+Comment=Customize the NOVA Island panel and media player
+Exec=gnome-extensions prefs nova-island@fromapurbo
+TryExec=gnome-extensions
+Icon=preferences-system
+Terminal=false
+Categories=Settings;DesktopSettings;
+OnlyShowIn=GNOME;

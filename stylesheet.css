@@ -1,0 +1,176 @@
+.nova-island,
+.nova-island-popover {
+    color: #f3f5fc;
+    border: 1px solid rgba(191, 206, 240, 0.36);
+    padding: 0;
+}
+
+.nova-island {
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.38);
+}
+
+.nova-island-popover {
+    border-radius: 24px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42);
+}
+
+.nova-island-pinned {
+    border-color: rgba(179, 198, 255, 0.56);
+}
+
+.nova-island:focus {
+    border-color: #bbccff;
+}
+
+.nova-island-calendar {
+    icon-size: 1.09em;
+}
+
+.nova-island-compact {
+    spacing: 9px;
+    padding: 1px 14px;
+}
+
+.nova-island-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background-color: #bdceff;
+    box-shadow: 0 0 3px rgba(150, 178, 255, 0.45);
+}
+
+.nova-island-time {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nova-island-preview {
+    spacing: 6px;
+    padding: 10px 20px;
+}
+
+.nova-island-preview-time {
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.nova-island-preview-date {
+    color: #b2bcd6;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.nova-media-compact {
+    padding: 1px 8px;
+    spacing: 5px;
+}
+
+.nova-media-mini-title {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.nova-visualizer {
+    spacing: 2px;
+}
+
+.nova-visualizer-bar {
+    width: 2px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.nova-media-expanded {
+    padding: 14px 18px 6px;
+}
+
+.nova-media-header,
+.nova-media-main,
+.nova-media-hero {
+    spacing: 7px;
+}
+
+.nova-media-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.nova-media-secondary {
+    font-size: 12px;
+}
+
+.nova-media-info {
+    spacing: 2px;
+}
+
+.nova-artwork {
+    border-radius: 7px;
+    background-gradient-direction: vertical;
+    background-gradient-start: #56678c;
+    background-gradient-end: #272e4e;
+    color: #eef3ff;
+}
+
+.nova-artwork-loaded {
+    background-color: transparent;
+    background-gradient-direction: none;
+}
+
+.nova-media-controls {
+    spacing: 3px;
+}
+
+.nova-media-action,
+.nova-module-tab {
+    border-radius: 8px;
+    padding: 6px 7px;
+}
+
+.nova-media-action:hover,
+.nova-media-action:focus,
+.nova-module-tab:hover,
+.nova-module-tab:focus {
+    background-color: rgba(170, 191, 255, 0.26);
+}
+
+.nova-media-selected {
+    background-color: rgba(170, 191, 255, 0.16);
+}
+
+.nova-media-play {
+    background-color: rgba(170, 191, 255, 0.23);
+}
+
+.nova-media-progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(170, 191, 255, 0.22);
+}
+
+.nova-media-lyrics {
+    min-height: 60px;
+}
+
+.nova-module-tabs {
+    spacing: 5px;
+    padding: 0 5px 5px;
+}
+
+.nova-module-tab {
+    font-size: 11px;
+    padding: 1px 8px;
+}
+
+.nova-karaoke {
+    background-color: rgba(15, 24, 32, 0.94);
+    border: 1px solid rgba(171, 216, 210, 0.16);
+    border-radius: 18px;
+    padding: 18px;
+    spacing: 10px;
+    color: #e6ebf2;
+}
+.nova-lyrics-heading { font-size: 14px; font-weight: 600; color: #a9c9c1; }
+.nova-lyrics-nav { spacing: 10px; }
+.nova-lyrics-state-icon { color: #9ff2d5; margin: 20px 0 12px; }

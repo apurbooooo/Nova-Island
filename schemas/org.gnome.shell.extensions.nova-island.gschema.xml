@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.nova-island"
+          path="/org/gnome/shell/extensions/nova-island/">
+    <key name="compact-width" type="i">
+      <range min="112" max="320"/>
+      <default>194</default>
+      <summary>Compact width in logical pixels</summary>
+    </key>
+    <key name="compact-height" type="i">
+      <range min="18" max="72"/>
+      <default>38</default>
+      <summary>Compact height in logical pixels</summary>
+    </key>
+    <key name="expanded-width" type="i">
+      <range min="260" max="640"/>
+      <default>456</default>
+      <summary>Expanded width in logical pixels</summary>
+    </key>
+    <key name="expanded-height" type="i">
+      <range min="116" max="640"/>
+      <default>320</default>
+      <summary>Expanded height in logical pixels</summary>
+    </key>
+    <key name="top-offset" type="i">
+      <range min="0" max="120"/>
+      <default>8</default>
+      <summary>Gap between the panel and the preview in logical pixels</summary>
+    </key>
+    <key name="horizontal-offset" type="i">
+      <range min="-600" max="600"/>
+      <default>0</default>
+      <summary>Preview offset from center in logical pixels</summary>
+    </key>
+    <key name="animation-speed" type="i">
+      <range min="25" max="200"/>
+      <default>100</default>
+      <summary>Animation speed as a percentage</summary>
+    </key>
+    <key name="mouse-leave-delay" type="i">
+      <range min="0" max="2000"/>
+      <default>300</default>
+      <summary>Delay before collapsing on pointer leave in milliseconds</summary>
+    </key>
+    <key name="glass-opacity" type="i">
+      <range min="0" max="100"/>
+      <default>94</default>
+      <summary>Island background opacity as a percentage</summary>
+    </key>
+    <key name="floating-fallback" type="b">
+      <default>false</default>
+      <summary>Show a floating pill when the top panel is unavailable</summary>
+    </key>
+    <key name="reduce-motion" type="b">
+      <default>false</default>
+      <summary>Reduce motion in NOVA Island</summary>
+    </key>
+    <key name="border-radius" type="i">
+      <range min="0" max="64"/>
+      <default>24</default>
+      <summary>Border radius</summary>
+    </key>
+    <key name="border-thickness" type="i">
+      <range min="0" max="4"/>
+      <default>1</default>
+      <summary>Border thickness</summary>
+    </key>
+    <key name="border-opacity" type="i">
+      <range min="0" max="100"/>
+      <default>36</default>
+      <summary>Border opacity</summary>
+    </key>
+    <key name="shadow-intensity" type="i">
+      <range min="0" max="100"/>
+      <default>42</default>
+      <summary>Shadow intensity</summary>
+    </key>
+    <key name="shadow-blur" type="i">
+      <range min="0" max="48"/>
+      <default>22</default>
+      <summary>Shadow blur</summary>
+    </key>
+    <key name="shadow-spread" type="i">
+      <range min="0" max="6"/>
+      <default>0</default>
+      <summary>Shadow spread</summary>
+    </key>
+    <key name="surface-color" type="s">
+      <default>'#090b11'</default>
+      <summary>Surface color</summary>
+    </key>
+    <key name="border-color" type="s">
+      <default>'#bfcef0'</default>
+      <summary>Border color</summary>
+    </key>
+    <key name="accent-color" type="s">
+      <default>'#bdceff'</default>
+      <summary>Accent color</summary>
+    </key>
+    <key name="text-color" type="s">
+      <default>'#f3f5fc'</default>
+      <summary>Text color</summary>
+    </key>
+    <key name="secondary-text-color" type="s">
+      <default>'#b2bcd6'</default>
+      <summary>Secondary text color</summary>
+    </key>
+    <key name="clock-font-size" type="i">
+      <range min="10" max="18"/>
+      <default>14</default>
+      <summary>Clock font size</summary>
+    </key>
+    <key name="compact-spacing" type="i">
+      <range min="0" max="24"/>
+      <default>9</default>
+      <summary>Compact spacing</summary>
+    </key>
+    <key name="expanded-spacing" type="i">
+      <range min="0" max="22"/>
+      <default>6</default>
+      <summary>Expanded spacing</summary>
+    </key>
+    <key name="content-alignment" type="s">
+      <choices>
+        <choice value="start"/>
+        <choice value="center"/>
+        <choice value="end"/>
+      </choices>
+      <default>'center'</default>
+      <summary>Content alignment</summary>
+    </key>
+    <key name="expand-duration" type="i">
+      <range min="0" max="1200"/>
+      <default>340</default>
+      <summary>Expand duration</summary>
+    </key>
+    <key name="collapse-duration" type="i">
+      <range min="0" max="1200"/>
+      <default>250</default>
+      <summary>Collapse duration</summary>
+    </key>
+    <key name="content-fade-duration" type="i">
+      <range min="0" max="1200"/>
+      <default>230</default>
+      <summary>Content fade duration</summary>
+    </key>
+    <key name="animation-intensity" type="i">
+      <range min="0" max="100"/>
+      <default>100</default>
+      <summary>Animation intensity</summary>
+    </key>
+    <key name="animation-style" type="s">
+      <choices>
+        <choice value="nova"/>
+        <choice value="smooth"/>
+        <choice value="spring"/>
+        <choice value="fade"/>
+      </choices>
+      <default>'nova'</default>
+      <summary>Animation style</summary>
+    </key>
+    <key name="hover-expand" type="b">
+      <default>true</default>
+      <summary>Hover expand</summary>
+    </key>
+    <key name="click-to-pin" type="b">
+      <default>true</default>
+      <summary>Click to pin</summary>
+    </key>
+    <key name="theme" type="s">
+      <choices>
+        <choice value="nova-dark"/>
+        <choice value="midnight"/>
+        <choice value="frosted"/>
+        <choice value="minimal"/>
+        <choice value="aurora"/>
+        <choice value="custom"/>
+      </choices>
+      <default>'nova-dark'</default>
+      <summary>Theme</summary>
+    </key>
+    <key name="saved-presets" type="s">
+      <default>'[]'</default>
+      <summary>Saved presets</summary>
+    </key>
+    <key name="clock-enabled" type="b">
+      <default>true</default>
+      <summary>Clock enabled</summary>
+    </key>
+    <key name="clock-compact" type="b">
+      <default>true</default>
+      <summary>Clock compact</summary>
+    </key>
+    <key name="clock-expanded" type="b">
+      <default>true</default>
+      <summary>Clock expanded</summary>
+    </key>
+    <key name="clock-priority" type="i">
+      <range min="0" max="100"/>
+      <default>50</default>
+      <summary>Clock priority</summary>
+    </key>
+    <key name="default-expanded-module" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="clock"/>
+        <choice value="media"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Default expanded module</summary>
+    </key>
+
+    <key name="media-expanded-layout" type="s">
+      <choices><choice value="wide"/><choice value="stacked"/></choices>
+      <default>'wide'</default>
+      <summary>Expanded media layout</summary>
+    </key>
+    <key name="lyrics-mode" type="s">
+      <choices><choice value="auto"/><choice value="synced"/><choice value="plain"/></choices>
+      <default>'auto'</default>
+      <summary>Lyrics display mode</summary>
+    </key>
+    <key name="media-enabled" type="b">
+      <default>true</default>
+      <summary>Media enabled</summary>
+    </key>
+    <key name="media-compact" type="b">
+      <default>true</default>
+      <summary>Media compact</summary>
+    </key>
+    <key name="media-expanded" type="b">
+      <default>true</default>
+      <summary>Media expanded</summary>
+    </key>
+    <key name="media-priority" type="i">
+      <range min="0" max="100"/>
+      <default>65</default>
+      <summary>Media priority</summary>
+    </key>
+    <key name="media-artwork" type="b">
+      <default>true</default>
+      <summary>Media artwork</summary>
+    </key>
+    <key name="remote-artwork" type="b">
+      <default>true</default>
+      <summary>Remote artwork</summary>
+    </key>
+    <key name="artwork-size" type="i">
+      <range min="36" max="160"/>
+      <default>100</default>
+      <summary>Artwork size</summary>
+    </key>
+    <key name="media-control-size" type="i">
+      <range min="16" max="32"/>
+      <default>22</default>
+    </key>
+    <key name="media-title-size" type="i">
+      <range min="14" max="34"/>
+      <default>22</default>
+    </key>
+    <key name="media-artist-size" type="i">
+      <range min="10" max="24"/>
+      <default>15</default>
+    </key>
+    <key name="media-artwork-cache" type="b"><default>true</default></key>
+    <key name="media-animations" type="b"><default>true</default></key>
+    <key name="media-visualizer" type="b">
+      <default>true</default>
+      <summary>Media visualizer</summary>
+    </key>
+    <key name="visualizer-intensity" type="i">
+      <range min="0" max="100"/>
+      <default>65</default>
+      <summary>Visualizer intensity</summary>
+    </key>
+    <key name="track-previews" type="b">
+      <default>false</default>
+      <summary>Track previews</summary>
+    </key>
+    <key name="track-preview-duration" type="i">
+      <range min="1000" max="10000"/>
+      <default>3500</default>
+      <summary>Track preview duration</summary>
+    </key>
+    <key name="default-player" type="s">
+      <default>''</default>
+      <summary>Default player</summary>
+    </key>
+    <key name="last-player" type="s">
+      <default>''</default>
+      <summary>Last player</summary>
+    </key>
+    <key name="player-priority" type="as">
+      <default>[]</default>
+      <summary>Player priority</summary>
+    </key>
+    <key name="lyrics-enabled" type="b">
+      <default>false</default>
+      <summary>Lyrics enabled</summary>
+    </key>
+    <key name="lyrics-font-size" type="i">
+      <range min="12" max="46"/>
+      <default>21</default>
+      <summary>Plain lyrics size</summary>
+    </key>
+    <key name="lyrics-current-size" type="i">
+      <range min="16" max="56"/>
+      <default>30</default>
+      <summary>Current line size</summary>
+    </key>
+    <key name="lyrics-neighbor-size" type="i">
+      <range min="12" max="42"/>
+      <default>23</default>
+      <summary>Surrounding line size</summary>
+    </key>
+    <key name="lyrics-width" type="i">
+      <range min="280" max="1200"/>
+      <default>620</default>
+      <summary>Lyrics panel width</summary>
+    </key>
+    <key name="lyrics-height" type="i">
+      <range min="240" max="1000"/>
+      <default>540</default>
+      <summary>Lyrics panel height</summary>
+    </key>
+    <key name="lyrics-spacing" type="i">
+      <range min="2" max="60"/>
+      <default>18</default>
+      <summary>Line spacing</summary>
+    </key>
+    <key name="lyrics-inactive-opacity" type="i">
+      <range min="10" max="95"/>
+      <default>54</default>
+      <summary>Inactive line opacity (%)</summary>
+    </key>
+    <key name="lyrics-scroll-duration" type="i">
+      <range min="0" max="900"/>
+      <default>260</default>
+      <summary>Scroll duration (ms)</summary>
+    </key>
+    <key name="lyrics-current-color" type="s">
+      <default>'#9ff2d5'</default>
+      <summary>Current line color</summary>
+    </key>
+    <key name="lyrics-word-color" type="s">
+      <default>'#ffffff'</default>
+      <summary>Word highlight color</summary>
+    </key>
+    <key name="lyrics-auto-scroll" type="b">
+      <default>true</default>
+      <summary>Follow the current line</summary>
+    </key>
+    <key name="lyrics-word-highlight" type="b">
+      <default>true</default>
+      <summary>Highlight timed words</summary>
+    </key>
+    <key name="lyrics-transition" type="s">
+      <choices><choice value="slide"/><choice value="fade"/><choice value="none"/></choices>
+      <default>'slide'</default>
+      <summary>Lyrics transition</summary>
+    </key>
+  </schema>
+</schemalist>

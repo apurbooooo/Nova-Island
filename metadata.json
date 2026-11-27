@@ -1,0 +1,10 @@
+{
+  "uuid": "nova-island@fromapurbo",
+  "name": "NOVA Island",
+  "description": "A customizable top-bar clock and media controller for GNOME Shell.",
+  "shell-version": ["51"],
+  "version": 6,
+  "version-name": "0.3.2",
+  "settings-schema": "org.gnome.shell.extensions.nova-island",
+  "session-modes": ["user"]
+}
