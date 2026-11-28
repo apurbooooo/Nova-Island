@@ -1,16 +1,15 @@
 # NOVA Island
 
-NOVA Island is a native GNOME Shell 51 extension for Wayland. Its centered pill shows the clock or the selected media player. Hover to open the preview beneath the bar. Click to pin it, then click again to collapse it. Use **Ctrl+Alt+Tab** to focus NOVA Island, **Enter** or **Space** to activate it, **Down** to reach preview controls, and **Escape** to collapse it.
+NOVA Island is a native GNOME Shell 51 extension for Wayland. Its centered pill shows the clock or the selected media player. Hover to open the preview beneath the bar. With the expanded default set to Automatic, it opens on Time when available. Explicit defaults, manual module selections, and media or notification event previews retain their own selection. Click to pin it, then click again to collapse it. Use **Ctrl+Alt+Tab** to focus NOVA Island, **Enter** or **Space** to activate it, **Down** to reach preview controls, and **Escape** to collapse it.
 
 The calendar icon opens GNOME’s original calendar and notifications menu. It sits beside the pill when the native date menu is centered. When the date menu is in a side group, as it is by default in GNOME Classic, the calendar icon stays in that group. Disabling NOVA restores the stock clock.
 
 ## Install
 
-Install the supplied 0.3.2 bundle with Fish. The bundle uses the existing extension UUID and preserves GSettings values.
+Install the 0.5.4 bundle from the project directory with Fish. The bundle uses the existing extension UUID and preserves GSettings values.
 
 ```fish
-cd ~/Projects/Nova-Island
-gnome-extensions install --force ./nova-island@fromapurbo.shell-extension.zip
+gnome-extensions install --force ./dist/nova-island@fromapurbo-0.5.4.shell-extension.zip
 set -l data_dir ~/.local/share
 if set -q XDG_DATA_HOME; and test -n "$XDG_DATA_HOME"
     set data_dir "$XDG_DATA_HOME"
@@ -27,7 +26,7 @@ gnome-extensions prefs nova-island@fromapurbo
 
 Open preferences from the gear in the expanded island, the NOVA Island Settings launcher, or GNOME Extensions. The launcher installation above is optional.
 
-To rebuild the bundle from this directory, run `gnome-extensions pack --force --extra-source=src --extra-source=applications --extra-source=LICENSE .`.
+To rebuild the bundle from this directory, run `gnome-extensions pack --force --extra-source=src --extra-source=applications --extra-source=LICENSE --extra-source=fonts --extra-source=tools --extra-source=INSTALL.txt .`.
 
 ## Customization Studio
 
@@ -41,7 +40,7 @@ The media runtime uses the GJS Gio, libsoup 3, and GdkPixbuf introspection libra
 
 NOVA discovers players advertising MPRIS on the session D-Bus. Clock remains available in the module settings and through the preview’s module tabs when both modules are enabled. Expanded media includes title, artist, album, cover, track time, and the player’s supported playback controls. The play button toggles playback, and the seek buttons move ten seconds. The player switch cycles available players and remembers the selection. When that player leaves, NOVA uses the configured default if available, then prioritizes playing clients and the order configured in **Media → Players**. A web tab appears only when its browser exposes an MPRIS player.
 
-Local artwork supports PNG, JPEG, and WebP. Remote HTTPS artwork is enabled by default. An explicitly saved off setting still takes precedence. Disable it or clear the in-memory cache in **Media → Expanded media**. The playback visualizer uses playback state to animate three bars. Automatic track previews and lyrics are off by default. Enable lyrics in **Media → Lyrics**, then use the lyrics button on the expanded media view. While lyrics are enabled, NOVA looks up each selected track on LRCLIB. The Lyrics button shows lookup status and switches between lyrics and playback controls. It uses timestamps when available and otherwise shows plain lyrics. [MPRIS player specification](https://specifications.freedesktop.org/mpris/latest/Player_Interface.html) · [LRCLIB API](https://lrclib.net/docs)
+Local artwork supports PNG, JPEG, and WebP. Remote HTTPS artwork is enabled by default. An explicitly saved off setting still takes precedence. Disable it or clear the in-memory cache in **Media → Expanded media**. The compact pill shows three visualizer bars during playback. The lyrics header shows artwork, title, artist, album, sync status, and four bars during playback. Automatic track previews and lyrics are off by default. Enable lyrics in **Media → Lyrics**, then use the lyrics button on the expanded media view. While lyrics are enabled, NOVA looks up each selected track on LRCLIB. The Lyrics button shows lookup status and switches between lyrics and playback controls. It uses timestamps when available and otherwise shows plain lyrics. [MPRIS player specification](https://specifications.freedesktop.org/mpris/latest/Player_Interface.html) · [LRCLIB API](https://lrclib.net/docs)
 
 ### Expanded lyrics in 0.3.2
 
@@ -76,8 +75,9 @@ test_dir=$(mktemp -d)
 glib-compile-schemas --strict --targetdir="$test_dir" schemas
 GSETTINGS_SCHEMA_DIR="$test_dir" GSETTINGS_BACKEND=memory gjs -m tests/studio.js
 dbus-run-session -- gjs -m tests/media.js
+gjs -m tests/enhancements.js
 mkdir -m 700 "$test_dir/runtime"
-gnome-extensions pack --extra-source=src --extra-source=applications --extra-source=LICENSE --out-dir="$test_dir" .
+gnome-extensions pack --extra-source=src --extra-source=applications --extra-source=LICENSE --extra-source=fonts --extra-source=tools --extra-source=INSTALL.txt --out-dir="$test_dir" .
 unzip -tq "$test_dir/nova-island@fromapurbo.shell-extension.zip"
 env -u DISPLAY -u WAYLAND_DISPLAY \
   XDG_RUNTIME_DIR="$test_dir/runtime" \

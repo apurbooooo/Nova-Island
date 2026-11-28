@@ -1,3 +1,12 @@
+/* ==========================================================================
+   NOVA Island 0.5 — shared design language
+   Surface colors, radius, border, and shadow come from the active theme
+   tokens (inline). Everything below layers neutral white/black alpha on top
+   so every module reads as one product on any theme.
+   ========================================================================== */
+
+/* ---------- Island surfaces ---------- */
+
 .nova-island,
 .nova-island-popover {
     color: #f3f5fc;
@@ -7,12 +16,17 @@
 
 .nova-island {
     border-radius: 999px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.38);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition-duration: 160ms;
+}
+
+.nova-island:hover {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
 }
 
 .nova-island-popover {
-    border-radius: 24px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42);
+    border-radius: 26px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
 .nova-island-pinned {
@@ -27,150 +41,1124 @@
     icon-size: 1.09em;
 }
 
+.nova-frame {
+    padding: 0;
+}
+
+.nova-frame-content {
+    padding: 0;
+}
+
+/* ---------- Bottom dock navigation ---------- */
+
+.nova-dock-wrap {
+    padding: 4px 12px 10px;
+}
+
+.nova-dock {
+    spacing: 2px;
+    padding: 4px;
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nova-dock-item {
+    width: 34px;
+    height: 30px;
+    border-radius: 11px;
+    color: rgba(240, 244, 255, 0.62);
+    transition-duration: 140ms;
+}
+
+.nova-dock-item:hover,
+.nova-dock-item:focus {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nova-dock-item:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.45);
+}
+
+.nova-dock-separator {
+    width: 1px;
+    margin: 7px 4px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.nova-tooltip {
+    font-size: 11px;
+    font-weight: 600;
+    color: #f5f7fd;
+    padding: 5px 10px;
+    border-radius: 9px;
+    background-color: rgba(18, 21, 30, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Typography ---------- */
+
+.nova-display {
+    font-size: 52px;
+    font-weight: 300;
+    font-feature-settings: "tnum";
+    letter-spacing: -1px;
+}
+
+.nova-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.nova-body {
+    font-size: 13px;
+}
+
+.nova-caption {
+    font-size: 11px;
+    color: rgba(235, 240, 255, 0.58);
+}
+
+.nova-muted {
+    color: rgba(235, 240, 255, 0.58);
+}
+
+.nova-faint {
+    color: rgba(235, 240, 255, 0.4);
+}
+
+.nova-tabular {
+    font-feature-settings: "tnum";
+}
+
+.nova-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(235, 240, 255, 0.46);
+    padding: 4px 4px 0;
+}
+
+/* ---------- Module scaffold ---------- */
+
+.nova-tool {
+    padding: 16px 16px 6px;
+    spacing: 12px;
+}
+
+.nova-tool-content {
+    spacing: 10px;
+    padding-bottom: 4px;
+}
+
+.nova-header {
+    spacing: 10px;
+}
+
+.nova-header-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
+}
+
+.nova-header-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.nova-header-subtitle {
+    font-size: 11px;
+    color: rgba(235, 240, 255, 0.55);
+}
+
+.nova-header-trailing {
+    spacing: 6px;
+}
+
+.nova-tool-compact {
+    spacing: 7px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ---------- Cards ---------- */
+
+.nova-card {
+    background-color: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 16px;
+    padding: 12px 14px;
+    spacing: 6px;
+}
+
+.nova-card-button {
+    transition-duration: 140ms;
+}
+
+.nova-card-button:hover,
+.nova-card-button:focus {
+    background-color: rgba(255, 255, 255, 0.095);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.nova-card-button:active {
+    background-color: rgba(255, 255, 255, 0.13);
+}
+
+.nova-card-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nova-card-value {
+    font-size: 22px;
+    font-weight: 700;
+    font-feature-settings: "tnum";
+}
+
+.nova-card-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(235, 240, 255, 0.55);
+}
+
+/* ---------- Buttons ---------- */
+
+.nova-btn {
+    border-radius: 12px;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f2f5fd;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition-duration: 140ms;
+}
+
+.nova-btn:hover,
+.nova-btn:focus {
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.nova-btn:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+}
+
+.nova-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nova-btn:insensitive {
+    color: rgba(235, 240, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.035);
+}
+
+.nova-btn-primary {
+    border-color: transparent;
+}
+
+.nova-btn-primary:hover,
+.nova-btn-primary:focus {
+    box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.14);
+}
+
+.nova-btn-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: rgba(235, 240, 255, 0.7);
+}
+
+.nova-btn-content {
+    spacing: 6px;
+}
+
+.nova-icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    color: rgba(240, 244, 255, 0.72);
+    transition-duration: 140ms;
+}
+
+.nova-icon-btn:hover,
+.nova-icon-btn:focus {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.11);
+}
+
+.nova-icon-btn:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+}
+
+.nova-icon-btn:insensitive {
+    color: rgba(235, 240, 255, 0.25);
+}
+
+.nova-icon-btn-filled {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+.nova-round-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    color: #f2f5fd;
+    background-color: rgba(255, 255, 255, 0.09);
+    transition-duration: 140ms;
+}
+
+.nova-round-btn:hover,
+.nova-round-btn:focus {
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+.nova-round-btn-large {
+    width: 56px;
+    height: 56px;
+}
+
+.nova-round-btn:insensitive {
+    color: rgba(235, 240, 255, 0.3);
+}
+
+/* ---------- Chips, segmented, search ---------- */
+
+.nova-chip {
+    spacing: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(240, 244, 255, 0.78);
+}
+
+.nova-chip-success { background-color: rgba(94, 224, 160, 0.14); color: #7ee8b4; }
+.nova-chip-warning { background-color: rgba(255, 197, 102, 0.15); color: #ffcf7f; }
+.nova-chip-danger { background-color: rgba(255, 122, 122, 0.15); color: #ff9a9a; }
+.nova-chip-accent { background-color: rgba(189, 206, 255, 0.16); color: #c9d6ff; }
+
+.nova-segmented {
+    spacing: 2px;
+    padding: 3px;
+    border-radius: 13px;
+    background-color: rgba(255, 255, 255, 0.055);
+}
+
+.nova-segment {
+    border-radius: 10px;
+    padding: 6px 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(240, 244, 255, 0.62);
+    transition-duration: 140ms;
+}
+
+.nova-segment:hover,
+.nova-segment:focus {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nova-segment-content {
+    spacing: 5px;
+}
+
+.nova-search {
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #f3f5fc;
+    caret-color: #f3f5fc;
+    selection-background-color: rgba(189, 206, 255, 0.4);
+    selected-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition-duration: 140ms;
+}
+
+.nova-search:hover {
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.nova-search:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.nova-search StLabel.hint-text {
+    color: rgba(235, 240, 255, 0.42);
+}
+
+.nova-search-icon {
+    color: rgba(235, 240, 255, 0.5);
+    padding-right: 8px;
+}
+
+/* ---------- Empty states ---------- */
+
+.nova-empty {
+    spacing: 6px;
+    padding: 22px 18px;
+}
+
+.nova-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+}
+
+.nova-empty-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.nova-empty-body {
+    font-size: 12px;
+    color: rgba(235, 240, 255, 0.55);
+    max-width: 300px;
+}
+
+/* ---------- Meters & graphs ---------- */
+
+.nova-meter {
+    height: 6px;
+}
+
+.nova-meter-thin {
+    height: 4px;
+}
+
+.nova-sparkline {
+    height: 46px;
+}
+
+.nova-ring-content {
+    spacing: 2px;
+}
+
+/* ---------- Clock ---------- */
+
 .nova-island-compact {
     spacing: 9px;
     padding: 1px 14px;
 }
 
 .nova-island-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 999px;
     background-color: #bdceff;
-    box-shadow: 0 0 3px rgba(150, 178, 255, 0.45);
 }
 
 .nova-island-time {
     font-size: 14px;
     font-weight: 600;
+    font-feature-settings: "tnum";
 }
 
 .nova-island-preview {
-    spacing: 6px;
-    padding: 10px 20px;
+    spacing: 4px;
+    padding: 22px 26px 16px;
+}
+
+.nova-clock-weekday {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
 .nova-island-preview-time {
-    font-size: 40px;
-    font-weight: 700;
+    font-size: 58px;
+    font-weight: 300;
+    letter-spacing: -1px;
+    font-feature-settings: "tnum";
 }
 
 .nova-island-preview-date {
     color: #b2bcd6;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
 }
 
+.nova-clock-meta {
+    spacing: 6px;
+    padding-top: 12px;
+}
+
+.nova-clock-day {
+    spacing: 6px;
+    padding-top: 12px;
+}
+
+/* ---------- Media ---------- */
+
 .nova-media-compact {
-    padding: 1px 8px;
-    spacing: 5px;
+    padding: 1px 10px 1px 6px;
+    spacing: 8px;
 }
 
 .nova-media-mini-title {
     font-size: 12px;
     font-weight: 600;
+    max-width: 190px;
 }
 
+.nova-media-mini-status {
+    color: rgba(235, 240, 255, 0.7);
+}
 
 .nova-visualizer {
     spacing: 2px;
 }
 
 .nova-visualizer-bar {
-    width: 2px;
-    height: 12px;
+    width: 3px;
+    height: 13px;
     border-radius: 2px;
 }
 
 .nova-media-expanded {
-    padding: 14px 18px 6px;
+    padding: 10px 18px 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 
-.nova-media-header,
-.nova-media-main,
-.nova-media-hero {
+.nova-media-header {
+    spacing: 8px;
+}
+
+.nova-media-source {
     spacing: 7px;
 }
 
-.nova-media-title {
-    font-size: 16px;
-    font-weight: 700;
+.nova-media-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
 }
 
 .nova-media-secondary {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(235, 240, 255, 0.6);
+}
+
+.nova-media-title {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.nova-media-artist {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nova-media-album {
     font-size: 12px;
+    color: rgba(235, 240, 255, 0.5);
 }
 
 .nova-media-info {
-    spacing: 2px;
+    spacing: 3px;
 }
 
 .nova-artwork {
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.07);
+    color: rgba(235, 240, 255, 0.45);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+#nova-media-small-art {
     border-radius: 7px;
-    background-gradient-direction: vertical;
-    background-gradient-start: #56678c;
-    background-gradient-end: #272e4e;
-    color: #eef3ff;
+    box-shadow: none;
 }
 
 .nova-artwork-loaded {
     background-color: transparent;
-    background-gradient-direction: none;
 }
 
 .nova-media-controls {
-    spacing: 3px;
+    spacing: 4px;
+    padding: 0;
 }
 
-.nova-media-action,
-.nova-module-tab {
-    border-radius: 8px;
-    padding: 6px 7px;
+.nova-media-action {
+    border-radius: 999px;
+    padding: 8px;
+    color: rgba(240, 244, 255, 0.78);
+    transition-duration: 140ms;
 }
 
 .nova-media-action:hover,
 .nova-media-action:focus,
 .nova-module-tab:hover,
 .nova-module-tab:focus {
-    background-color: rgba(170, 191, 255, 0.26);
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.11);
+}
+
+.nova-media-action:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+}
+
+.nova-media-pill {
+    border-radius: 999px;
+    padding: 3px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .nova-media-selected {
-    background-color: rgba(170, 191, 255, 0.16);
+    background-color: rgba(255, 255, 255, 0.14);
 }
 
 .nova-media-play {
-    background-color: rgba(170, 191, 255, 0.23);
+    border-radius: 999px;
+    padding: 10px;
+    margin: 0 6px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.nova-media-play:hover,
+.nova-media-play:focus {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 0 0 100px rgba(255, 255, 255, 0.14);
 }
 
 .nova-media-progress {
-    height: 6px;
-    border-radius: 3px;
-    background-color: rgba(170, 191, 255, 0.22);
+    height: 5px;
 }
 
-.nova-media-lyrics {
-    min-height: 60px;
-}
-
-.nova-module-tabs {
+.nova-media-timeline {
     spacing: 5px;
-    padding: 0 5px 5px;
+    padding-top: 2px;
+}
+
+.nova-media-times {
+    font-size: 10.5px;
+    font-feature-settings: "tnum";
+}
+
+.nova-media-lyrics-toggle {
+    background-color: rgba(255, 255, 255, 0.10);
+    border: 1px solid transparent;
+    border-radius: 13px;
+    padding: 2px 8px 2px 5px;
+}
+
+.nova-media-lyrics-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.17);
+}
+
+.nova-media-lyrics-toggle:focus {
+    background-color: rgba(255, 255, 255, 0.23);
+    box-shadow: none;
+}
+
+.nova-media-lyrics-toggle:active {
+    background-color: rgba(255, 255, 255, 0.27);
+}
+
+.nova-media-lyrics-content {
+    spacing: 7px;
+}
+
+.nova-media-lyrics-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+}
+
+.nova-media-lyrics-copy {
+    spacing: 1px;
+}
+
+.nova-media-lyrics-action {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.nova-media-lyrics-status {
+    font-size: 10px;
+    font-weight: 500;
 }
 
 .nova-module-tab {
+    border-radius: 8px;
+    padding: 2px 8px;
     font-size: 11px;
-    padding: 1px 8px;
 }
 
+/* ---------- Karaoke ---------- */
+
 .nova-karaoke {
-    background-color: rgba(15, 24, 32, 0.94);
-    border: 1px solid rgba(171, 216, 210, 0.16);
-    border-radius: 18px;
-    padding: 18px;
+    /* Shares the media surface's blurred artwork; a light shade only adds depth. */
+    background-color: rgba(0, 0, 0, 0.16);
+    border-radius: 16px;
+    padding: 12px 16px 10px;
     spacing: 10px;
     color: #e6ebf2;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
-.nova-lyrics-heading { font-size: 14px; font-weight: 600; color: #a9c9c1; }
-.nova-lyrics-nav { spacing: 10px; }
-.nova-lyrics-state-icon { color: #9ff2d5; margin: 20px 0 12px; }
+
+.nova-lyrics-track-header {
+    spacing: 10px;
+}
+
+.nova-lyrics-track-info {
+    spacing: 2px;
+}
+
+.nova-lyrics-track-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.nova-lyrics-track-detail {
+    font-size: 11px;
+    color: rgba(235, 240, 255, 0.75);
+}
+
+.nova-lyrics-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(235, 240, 255, 0.55);
+}
+
+.nova-lyrics-nav {
+    spacing: 6px;
+}
+
+.nova-lyrics-state-icon {
+    margin: 20px 0 12px;
+}
+
+/* ---------- Notifications ---------- */
+
+.nova-notifications-compact {
+    spacing: 7px;
+    padding: 1px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nova-notifications-badge {
+    min-width: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+}
+
+.nova-notifications-list {
+    spacing: 8px;
+}
+
+.nova-notifications-item {
+    spacing: 12px;
+    padding: 11px 10px 11px 12px;
+}
+
+.nova-notifications-app-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background-color: rgba(255, 255, 255, 0.09);
+}
+
+.nova-notifications-source {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(235, 240, 255, 0.55);
+}
+
+.nova-notifications-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nova-notifications-priority {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+}
+
+.nova-priority-high { background-color: #ffc566; }
+.nova-priority-critical { background-color: #ff7a7a; }
+
+/* ---------- Productivity ---------- */
+
+.nova-productivity {
+    padding: 14px 16px 6px;
+    spacing: 12px;
+}
+
+.nova-productivity-compact {
+    spacing: 7px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+}
+
+.nova-productivity-content {
+    spacing: 12px;
+    padding-bottom: 4px;
+}
+
+.nova-productivity-time {
+    font-size: 46px;
+    font-weight: 300;
+    font-feature-settings: "tnum";
+}
+
+.nova-productivity-ring-time {
+    font-size: 32px;
+    font-weight: 400;
+    font-feature-settings: "tnum";
+}
+
+.nova-productivity-details {
+    font-size: 12px;
+    color: rgba(235, 240, 255, 0.58);
+}
+
+.nova-productivity-controls {
+    spacing: 14px;
+    padding: 2px 0;
+}
+
+.nova-cal-head {
+    spacing: 6px;
+    padding: 0 2px;
+}
+
+.nova-cal-month {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.nova-cal-grid {
+    padding: 2px 0;
+}
+
+.nova-cal-weekday {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(235, 240, 255, 0.42);
+    padding-bottom: 4px;
+}
+
+.nova-cal-day {
+    height: 34px;
+    border-radius: 11px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-feature-settings: "tnum";
+    transition-duration: 120ms;
+}
+
+.nova-cal-day:hover,
+.nova-cal-day:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nova-cal-day-outside {
+    color: rgba(235, 240, 255, 0.28);
+}
+
+.nova-cal-day-weekend {
+    color: rgba(235, 240, 255, 0.62);
+}
+
+.nova-cal-day-selected {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+}
+
+.nova-cal-day-content {
+    spacing: 2px;
+}
+
+.nova-cal-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+}
+
+.nova-event-row {
+    spacing: 10px;
+    padding: 2px 0;
+}
+
+.nova-event-bar {
+    width: 3px;
+    border-radius: 2px;
+}
+
+.nova-world-card {
+    spacing: 12px;
+    padding: 11px 14px;
+}
+
+.nova-world-time {
+    font-size: 24px;
+    font-weight: 500;
+    font-feature-settings: "tnum";
+}
+
+.nova-lap-row {
+    spacing: 10px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-feature-settings: "tnum";
+}
+
+.nova-session-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+
+.nova-session-dots {
+    spacing: 6px;
+}
+
+/* ---------- Clipboard ---------- */
+
+.nova-clip-item {
+    spacing: 4px;
+    padding: 4px 6px 4px 4px;
+}
+
+.nova-clip-main {
+    border-radius: 12px;
+    padding: 6px 8px;
+    transition-duration: 140ms;
+}
+
+.nova-clip-main:hover,
+.nova-clip-main:focus {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.nova-clip-main-content {
+    spacing: 11px;
+}
+
+.nova-clip-kind {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nova-clip-thumb {
+    width: 52px;
+    height: 38px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.nova-clip-text {
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.nova-clip-list {
+    spacing: 6px;
+}
+
+.nova-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+}
+
+/* ---------- Emoji ---------- */
+
+.nova-emoji-grid {
+    padding: 2px 0;
+}
+
+.nova-emoji-cell {
+    min-width: 36px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 22px;
+    padding: 0 6px;
+    transition-duration: 100ms;
+}
+
+.nova-emoji-cell:hover,
+.nova-emoji-cell:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.nova-emoji-cell:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.5);
+}
+
+.nova-emoji-kaomoji {
+    font-size: 13px;
+    padding: 0 10px;
+}
+
+.nova-emoji-footer {
+    spacing: 10px;
+    padding: 8px 12px;
+}
+
+.nova-emoji-preview {
+    font-size: 26px;
+}
+
+/* ---------- Screenshot Studio ---------- */
+
+.nova-shot-actions {
+    spacing: 10px;
+}
+
+.nova-shot-card {
+    padding: 16px;
+    spacing: 10px;
+}
+
+.nova-shot-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+}
+
+.nova-shot-preview {
+    width: 96px;
+    height: 60px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.06);
+    background-size: cover;
+}
+
+/* ---------- System Monitor ---------- */
+
+.nova-monitor-grid {
+    spacing: 10px;
+}
+
+.nova-monitor-row {
+    spacing: 10px;
+}
+
+.nova-monitor-card {
+    spacing: 8px;
+    padding: 12px 14px;
+}
+
+.nova-monitor-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+}
+
+.nova-monitor-legend {
+    spacing: 12px;
+    font-size: 11px;
+}
+
+.nova-temp-row {
+    spacing: 10px;
+}
+
+.nova-temp-meter {
+    width: 70px;
+}
+
+/* ---------- Quick Settings ---------- */
+
+.nova-qs-grid {
+    spacing: 10px;
+}
+
+.nova-qs-row {
+    spacing: 10px;
+}
+
+.nova-qs-tile {
+    border-radius: 18px;
+    padding: 11px 13px;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition-duration: 160ms;
+}
+
+.nova-qs-tile:hover,
+.nova-qs-tile:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.nova-qs-tile:focus {
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.42);
+}
+
+.nova-qs-tile-content {
+    spacing: 11px;
+}
+
+.nova-qs-tile-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nova-qs-tile-title {
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.nova-qs-tile-state {
+    font-size: 11px;
+    color: rgba(235, 240, 255, 0.55);
+}
+
+.nova-qs-slider-row {
+    spacing: 10px;
+}
+
+.nova-qs-slider-card {
+    spacing: 12px;
+    padding: 10px 14px;
+}
+
+.nova-qs-value {
+    min-width: 38px;
+    font-size: 11.5px;
+    font-weight: 700;
+    font-feature-settings: "tnum";
+    color: rgba(235, 240, 255, 0.7);
+}
+
+.nova-slider {
+    height: 22px;
+    -barlevel-height: 6px;
+    -barlevel-background-color: rgba(255, 255, 255, 0.13);
+    -barlevel-border-width: 0;
+    -barlevel-border-color: transparent;
+    -barlevel-overdrive-color: #ff9a9a;
+    -barlevel-overdrive-separator-width: 2px;
+    -slider-handle-radius: 8px;
+    -slider-handle-border-width: 0;
+    -slider-handle-border-color: transparent;
+    color: #ffffff;
+}
+
+.nova-qs-footer {
+    spacing: 8px;
+    padding-top: 2px;
+}

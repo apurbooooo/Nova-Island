@@ -34,7 +34,7 @@ export const THEMES = Object.freeze({
     'nova-dark': ['NOVA Dark', dark],
     midnight: ['Midnight', {...dark, 'surface-color': '#101734', 'accent-color': '#a8baff',
         'border-color': '#8ea5ff', 'secondary-text-color': '#c1ccf8', 'border-opacity': 46}],
-    frosted: ['Frosted Glass', {...dark, 'surface-color': '#29364e', 'glass-opacity': 76,
+    frosted: ['Frosted Glass', {...dark, 'surface-color': '#26324a', 'glass-opacity': 86,
         'border-color': '#d7eeff', 'accent-color': '#c5eaff', 'border-opacity': 62,
         'secondary-text-color': '#e3edfa', 'shadow-intensity': 28, 'shadow-blur': 26}],
     minimal: ['Minimal Black', {...dark, 'surface-color': '#080808', 'glass-opacity': 100,
@@ -48,7 +48,20 @@ export const THEMES = Object.freeze({
 export const ALIGNMENTS = [['start', 'Start'], ['center', 'Center'], ['end', 'End']];
 export const ANIMATIONS = [['nova', 'NOVA'], ['smooth', 'Smooth'], ['spring', 'Spring'], ['fade', 'Fade']];
 export const COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
-export const MODULES = [['clock', 'Clock'], ['media', 'Media Player']];
+export const MODULES = [['clock', 'Clock'], ['media', 'Media Player'], ['notifications', 'Notifications'],
+    ['productivity', 'Productivity'], ['clipboard', 'Clipboard'], ['emoji', 'Emoji'],
+    ['screenshot', 'Screenshot Studio'], ['system-monitor', 'System Monitor'], ['quick-settings', 'Quick Settings']];
+export const MODULE_ICONS = Object.freeze({
+    clock: 'preferences-system-time-symbolic',
+    media: 'audio-x-generic-symbolic',
+    notifications: 'preferences-system-notifications-symbolic',
+    productivity: 'x-office-calendar-symbolic',
+    clipboard: 'edit-paste-symbolic',
+    emoji: 'face-smile-symbolic',
+    screenshot: 'applets-screenshooter-symbolic',
+    'system-monitor': 'power-profile-performance-symbolic',
+    'quick-settings': 'view-grid-symbolic',
+});
 
 export function readSetting(settings, key, fallback = undefined) {
     return settings.settings_schema.has_key(key) ? settings.get_value(key).deepUnpack() : fallback;

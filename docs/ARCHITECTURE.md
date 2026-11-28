@@ -16,7 +16,7 @@ NOVA Island is a GNOME Shell 51 extension for Wayland. The Shell process owns th
 | Lifecycle manager | Disconnects signals, cancels pending work, and destroys actors in reverse registration order. Enable failures use the same cleanup path. |
 | Theme manager | Applies the glass opacity and visual state classes. The bundled Shell stylesheet defines color, type, spacing, radius, and elevation. |
 | Settings manager | Reads typed settings and observes changes through the Shell lifecycle. Preferences bind their native controls directly to the same schema. |
-| Notification manager | Planned. It will translate supported notification events into sanitized previews and apply priority and focus policy before requesting a temporary peek. |
+| Notification manager | Observes Shell 51.1 message tray sources while enabled, keeps a bounded in-memory list of source names and titles, and requests NOVA previews through the existing widget callback. |
 
 ## Panel integration
 
@@ -69,6 +69,14 @@ The widget presents Clock or Media through the same controller. Temporary media 
 
 Artwork and lyrics use cancellable asynchronous I/O. The artwork cache stores up to 20 decoded images or failures in memory. Successful art expires after ten minutes and failures after 30 seconds. Local inputs must be regular files. Artwork requests require a direct HTTPS response or loopback HTTP. Artwork limits are 2 MiB and 4,096 pixels per side before decode, with images downscaled before upload to St. The lyrics cache holds up to 24 entries with a 30-minute success lifetime and short miss or error lifetimes. Requests have a deadline, bounded response bodies, and a cooldown after rate limits. With lyrics enabled, a change to the selected track signature triggers an exact lookup on LRCLIB. A miss triggers a search with artist, title, and duration matching. The HTTP implementation uses asynchronous libsoup and Gio. On disable, NOVA cancels requests and releases its memory caches. [MPRIS player specification](https://specifications.freedesktop.org/mpris/latest/Player_Interface.html) · [LRCLIB API](https://lrclib.net/docs)
 
+## Notifications runtime
+
+Shell 51.1's `Main.messageTray` provides `getSources()`, `source-added` and `source-removed`. Each `MessageTray.Source` provides `notification-added`. NOVA observes these signals and leaves the native source, notification, policy, banner queue, and acknowledgement state intact. The matching Shell 51.1 implementation emits `notification-added` after inserting a notification. The installed `org.gnome.desktop.notifications` schema supplies `show-banners`. NOVA checks that setting and the source policy before requesting its own preview.
+
+The module is disabled by default. When enabled, it keeps up to 20 source names and notification titles in memory. Dismiss and Clear history affect NOVA's list only. Disable clears the list and disconnects its observers. Lock clears the list. `Main.sessionMode.isLocked` and `hasWindows` prevent collection on the lock screen. The controller also hides the island in that mode. Do Not Disturb suppresses NOVA previews. Focus Mode permits only critical NOVA previews. Both modes leave Shell's native notification policy intact. The normal controller animation path handles reduced motion, and one cancellable timer handles automatic collapse. No body text, icon payload, action, or notification object is retained in the history.
+
+The source signal and lifecycle behavior were checked against [GNOME Shell 51.1 messageTray.js](https://github.com/GNOME/gnome-shell/blob/51.1/js/ui/messageTray.js) and exercised in an isolated GNOME Shell 51.1 compositor. The message tray is a Shell JavaScript API, outside the Shell GIR surface.
+
 ## Module boundaries
 
 - `extension.js` composes Shell modules under `src/shell/`.
@@ -84,3 +92,47 @@ On a cache miss, the provider sends the bounded HTTP payload to a short-lived GJ
 Word mode requires a positive provider flag and usable timestamps that map to the original line text. Cues store absolute seconds and word character ranges. Optional end times clear the highlight in gaps. Lines without word timings can still follow their supplied line start. The worker falls back to LRC, then plain text. The playback path uses binary search over sorted cues.
 
 The panel reuses five labels. It measures wrapped rows when the visible window or styling changes, and uses Clutter translation, scale and opacity for transitions. Word color changes use escaped Pango markup. A visible, advancing timed view samples the local monotonic playback clock every 32 ms. D-Bus changes and seeks refresh it immediately. The tick stops on pause, collapse, end or teardown. The island controller sizes the active lyrics view through the existing scaled, monitor-clamped geometry function.
+
+## Productivity runtime
+
+`src/productivity/timers.js` holds the independent timer model. `src/shell/widgets/productivity.js` owns the calendar, world-clock view, timer controls, completion alerts, and one GLib sampling source. It uses `GLib.get_monotonic_time()` in milliseconds as the source of elapsed time. The sampling callback only refreshes presentation and detects completion. A delayed callback preserves elapsed time accurately. Linux monotonic time excludes time spent suspended, so these timers count awake time. Completion detection can run up to roughly a second after a boundary.
+
+Stopwatch laps store cumulative elapsed values, with a limit of 100. Countdown completion is emitted once. Pomodoro alternates focus and break durations, counts completed focus intervals, and waits for explicit Start at each phase. The runtime `productivity-focus-active` flag joins the manual NOVA Focus Mode filter. Pausing, completion, disabling the module, and teardown clear that runtime flag. Native GNOME notification policy is untouched. Completion uses Shell's `Main.notify()` and follows native notification policy.
+
+Versioned JSON snapshots are stored on actions, every 15 seconds during a running session, and on teardown. Restoration validates numeric state and always resumes paused, including after logout or reboot. Abrupt process termination may lose up to a checkpoint interval. Graceful disable captures current elapsed time. Module disable pauses sessions. No background alarm delivery is provided while the extension is disabled or Shell is absent. Runtime snapshots and focus flags are excluded from customization presets.
+
+The calendar reuses Shell 51.1 `Calendar.Calendar`, `setDate()`, `selected-date-changed`, `setEventSource()`, and `DBusEventSource`. The event source loads asynchronously and exposes `changed`, `hasCalendars`, and `getEvents(begin, end)`. A selected-day list shows at most 20 event summaries. Calendar actors and event sources are released when the widget is hidden or disabled. World clocks use GLib IANA time zones and local date formatting, with up to 12 zones. Timer settings apply to idle/reset intervals and subsequent Pomodoro phases.
+
+Calendar behavior was audited against the [GNOME Shell 51.1 calendar implementation](https://github.com/GNOME/gnome-shell/blob/51.1/js/ui/calendar.js). The installed Shell 51.1 compositor exercised the actor and event-source interface. This host's calendar service fails to load its libecal dependency, so real event delivery remains UNVERIFIED.
+
+## Desktop Tools runtime
+
+The five Desktop Tools are independent widget factories under `src/shell/widgets/`. Each is disabled by default and uses the normal module selection, focus navigation, theme surface, and reduced-motion expansion. Module navigation scrolls horizontally when additional tools exceed the available width. `desktopShared.js` supplies only the common view and button construction. Each tool owns its I/O, state, and teardown.
+
+### Clipboard
+
+`desktop/clipboard.js` observes `global.display.get_selection()` and Mutter's `owner-changed` signal only when both the Clipboard module and Capture clipboard are enabled. It reads only `Meta.SelectionType.SELECTION_CLIPBOARD`, using `transfer_async()` with a size bound, `Gio.Cancellable`, a three-second deadline, and a generation guard. PRIMARY selection is excluded. Text and PNG transfers are capped at 2 MiB per item. No initial clipboard read occurs when capture is enabled. Copying an item uses `St.Clipboard.set_text()` or `set_content()`.
+
+`clipboardHistory.js` owns search, de-duplication, pins, and retention. History stays in process memory, with a configurable 1–100 item limit, an 8 MiB raw-payload budget, and configurable age expiry for unpinned entries. Pins obey hard item and byte limits. Clear cancels an in-flight read before deleting entries. Lock, capture off, module disable, and extension teardown clear history. A minute-level expiry callback exists only during capture. PNG items are offered by type in the list and can be copied back without decoding them inside Shell.
+
+The manager excludes password-manager selections advertising `x-kde-passwordManagerHint`, private-key text, labelled passwords/tokens, digit-only short codes and card-like strings, and user-supplied exclusion terms. These heuristics cannot identify every secret, private browser session, or password. Image contents are not inspected for secrets. Clipboard capture is a user-enabled Shell privilege and follows the compositor selection API. There is no X11 helper, focus bypass, clipboard disk log, or network transfer. Capture opt-in and exclusions are excluded from customization presets.
+
+### Emoji
+
+`desktop/emoji.js` contains a curated offline collection with English search keywords. The picker supports search, Enter to copy the first result, Down to enter results, and ordinary Tab/Enter navigation. It writes the selected UTF-8 string to the clipboard so the user can paste in the destination application. It does not inject virtual keystrokes into another Wayland client. Twenty validated recent selections persist locally in GSettings and are excluded from presets. The collection is a compact subset of Unicode emoji, with symbols and kaomoji, and depends on the installed fonts for rendering.
+
+### Screenshot Studio
+
+Capture opens `Main.screenshotUI.open()`, allowing the user to select screen, window, or area in GNOME's native UI. Record screen opens Shell's exported `showScreenRecordingUI()`. Shell owns the consent, selection, recording indicator, stop action, and default Pictures/Videos save behavior. Shell 51.1 supports screen and area recording, while its source explicitly leaves window recording unsupported. The tool tracks only a capture initiated through its own button and reads the `screenshot-taken` file signal. The native workflow already exports screenshots to the clipboard. NOVA additionally offers Copy image for that file with a 20 MiB read limit.
+
+Save a copy uses `org.freedesktop.portal.FileChooser.SaveFile`, then asynchronously copies to the returned local URI. `desktop/portal.js` subscribes to the expected Request path before calling the portal and handles response codes, service errors, timeout, and cancellation. No file copy occurs after a refusal or cancelled request. Lock or disable cancels owned requests and file I/O. The original capture and recording remain owned by Shell. NOVA respects Shell's capture and save-to-disk lockdown behavior and retains only the last requested screenshot file reference. Selecting another recording destination is provided by the native workflow where supported, and NOVA's Save a copy action applies to screenshots.
+
+### System Monitor and Quick Settings
+
+`desktop/systemMonitor.js` reads procfs and discovers a bounded set of sysfs thermal zones, battery capacity files, and DRM `gpu_busy_percent` files. `desktop/metrics.js` calculates CPU deltas, MemAvailable-based used memory, and per-interface network deltas using monotonic sample intervals. Network rates sum non-loopback interfaces and can count both virtual and physical paths. Counter resets and missing data are handled without estimating unavailable values. GPU support currently covers drivers exposing `gpu_busy_percent`; proprietary/vendor interfaces are omitted. Sensor files are discovered per enable lifecycle. No external monitoring subprocess or GPU polling tool is required.
+
+One GLib source samples only while System Monitor is expanded, at a configurable 1–30 second interval. Reads are asynchronous, overlap is suppressed, and unmapped/disabled views cancel I/O and discard late results. Volume comes from Shell's shared `Volume.getMixerControl()` and brightness from `Main.brightnessManager.globalScale` when present.
+
+Quick Settings changes native output volume within the normal range, toggles mute, adjusts available brightness, and binds Night Light to its native GSettings key when the monitor supports it. Wi-Fi/Bluetooth and audio device selection open `Main.panel.statusArea.quickSettings.menu`; GNOME handles device availability, networking, pairing, and authentication. Lock and Power Off call the availability-checked `SystemActions` methods. Power Off enters the session manager's native confirmation flow. Native singleton services stay owned by Shell; NOVA disconnects its own observers. The widget callback can request immediate island collapse before opening native controls.
+
+The API audit used matching [Shell 51.1 screenshot source](https://github.com/GNOME/gnome-shell/blob/51.1/js/ui/screenshot.js), [Mutter 51.1 selection implementation](https://github.com/GNOME/mutter/blob/51.1/src/core/meta-selection.c), [Shell 51.1 system actions](https://github.com/GNOME/gnome-shell/blob/51.1/js/misc/systemActions.js), [brightness manager](https://github.com/GNOME/gnome-shell/blob/51.1/js/misc/brightnessManager.js), [volume interface](https://github.com/GNOME/gnome-shell/blob/51.1/js/ui/status/volume.js), and the [file chooser portal contract](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.FileChooser.html). Available calls and signals were exercised in the installed Shell 51.1 compositor.

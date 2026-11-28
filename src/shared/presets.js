@@ -6,7 +6,8 @@ import {COLOR_PATTERN} from './studio.js';
 export const MAX_PRESET_BYTES = 65536;
 const MAX_SAVED = 24;
 const SCHEMA_VERSION = 1;
-const OMIT = new Set(['saved-presets', 'last-player']);
+const OMIT = new Set(['saved-presets', 'last-player', 'productivity-state', 'productivity-focus-active',
+    'emoji-recent', 'clipboard-capture', 'clipboard-exclusions']);
 const validName = name => typeof name === 'string' && name.trim() === name &&
     name.length > 0 && name.length <= 60 && !/[\u0000-\u001f\u007f]/.test(name);
 const validPlayer = value => value.startsWith('org.mpris.MediaPlayer2.') && Gio.dbus_is_name(value);

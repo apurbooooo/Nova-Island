@@ -1,0 +1,69 @@
+NOVA Island 0.5.4 — media experience, lyrics and clock restoration
+
+Metadata: version 13, version-name 0.5.4; GNOME Shell 51.
+- Clock: compact and expanded time/date re-read the wall clock (and its
+  timezone) whenever the Clock module is shown again after switching modules.
+- Compact media pill: artwork, title, visualizer while playing, pause/stop
+  state when not; long titles ellipsize.
+- Media Player and Lyrics share a dark, heavily blurred album-artwork backdrop
+  that crossfades on track changes.
+- Lyrics shows the cover, track title, artist, album and sync status. Four
+  visualizer bars appear during playback when the visualizer is enabled.
+- An automatic expansion opens Time when available. Explicit module defaults,
+  manual selections and media or notification event previews still apply.
+
+INSTALL ON GNOME SHELL / WAYLAND
+
+  gnome-extensions install --force ./dist/nova-island@fromapurbo-0.5.4.shell-extension.zip
+
+Log out of GNOME and log back in to load the new extension code, then run:
+
+  gnome-extensions enable nova-island@fromapurbo
+  gnome-extensions prefs nova-island@fromapurbo
+
+Clock Font now applies immediately to both the compact and expanded Clock
+module time labels, and to their Preferences previews. Size, weight, spacing
+and alignment remain controlled by their existing settings/styles. System
+Default restores the original inherited font. No new settings or fonts are
+required for this fix. Clock fonts already installed for 0.5.1 remain available. First-time font setup still uses the
+existing Preferences Install fonts button, or tools/install-fonts.js, followed
+by logout/login. Fonts, licenses, schema defaults and all visual assets are
+unchanged from 0.5.1. The Clock Font subtitle now reflects both clock sizes.
+Wayland cannot restart Shell in place.
+
+USE
+
+Hover the small compact Island pill at the top of the screen:
+- Wheel down: next enabled, available module in priority order.
+- Wheel up: previous module, with wrapping at either end.
+- A manual selection updates the compact contents immediately and is used when
+  expanding that module, subject to its existing expanded-visibility setting.
+- Explicit wheel selection can reach modules excluded from automatic compact
+  display. Existing priorities and compact/expanded visibility settings remain
+  unchanged. The playing media pill and automatic Time expansion each follow their own
+  priority rules. Disabling
+  the selected module or losing availability falls back to automatic priority.
+- Scroll input does not itself open, close or pin the Island. The existing
+  hover-expand preference still applies when the pointer enters the pill.
+
+While expanded, the compact top pill remains a scroll target. Non-interactive
+headers and outer backgrounds can also switch modules. Scrollable bodies,
+buttons, search fields, sliders and other controls retain their own input.
+The navigation dock keeps its original appearance, clicks and tooltips; the
+module-switch wheel target has moved from that dock to the Island itself.
+
+Smooth input accumulates to a logical wheel step, with a 140 ms minimum switch
+interval, direction/idle reset and duplicate-emulated-event suppression. One
+input event switches at most once. Eligible vertical gestures are consumed;
+horizontal, content, control, outside and single-candidate events propagate.
+Selection is session-local and clears when the extension is disabled.
+
+BUILD FROM THIS SOURCE DIRECTORY
+
+  glib-compile-schemas --strict --dry-run schemas
+  gnome-extensions pack --force --extra-source=src --extra-source=applications \
+    --extra-source=LICENSE --extra-source=fonts --extra-source=tools \
+    --extra-source=INSTALL.txt --out-dir=/tmp .
+
+Copy the generic output /tmp/nova-island@fromapurbo.shell-extension.zip to a
+versioned 0.5.4 filename.

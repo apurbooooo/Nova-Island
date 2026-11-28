@@ -19,11 +19,10 @@ function lineLabel() {
 }
 
 export class KaraokeView {
-    constructor(settings) {
+    constructor(settings, header) {
         this.settings = settings;
         this.actor = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, x_expand: true,
             y_expand: true, style_class: 'nova-karaoke', name: 'nova-media-lyrics-view'});
-        this.heading = new St.Label({style_class: 'nova-lyrics-heading'});
         this.stage = new St.Widget({layout_manager: new Clutter.BinLayout(), clip_to_allocation: true,
             x_expand: true, y_expand: true});
         this.rows = Array.from({length: 5}, () => {
@@ -41,16 +40,39 @@ export class KaraokeView {
         body.add_child(this.message);
         this.scroll.set_child(body);
         this.nav = new St.BoxLayout({x_align: Clutter.ActorAlign.CENTER, style_class: 'nova-lyrics-nav'});
-        for (const [name, label, step] of [['Previous lyric line', '↑', -1], ['Return to current line', 'Current', 0],
-            ['Next lyric line', '↓', 1]]) {
-            const button = new St.Button({label, accessible_name: name, can_focus: true,
-                style_class: 'nova-media-action'});
+        for (const [name, iconName, step] of [['Previous lyric line', 'go-up-symbolic', -1],
+            ['Return to current line', null, 0], ['Next lyric line', 'go-down-symbolic', 1]]) {
+            const button = new St.Button({accessible_name: name, can_focus: true, reactive: true,
+                style_class: iconName ? 'nova-media-action' : 'nova-media-action nova-media-pill'});
+            if (iconName)
+                button.child = new St.Icon({icon_name: iconName, icon_size: 14});
+            else
+                button.label = 'Now playing';
             button.connect('clicked', () => this.navigate(step));
             this.nav.add_child(button);
         }
-        for (const actor of [this.heading, this.stage, this.scroll, this.nav])
+        for (const actor of [header, this.stage, this.scroll, this.nav])
             this.actor.add_child(actor);
-        this.stage.connect('notify::width', () => this.paint(true));
+        // Re-measure after the stage settles, never inside its allocation: restyling rows
+        // there re-enters layout. The cached width also avoids get_allocation_box(),
+        // which forces a stage relayout while one is pending.
+        this.stage.connect('notify::allocation', () => {
+            const box = this.stage.get_allocation_box();
+            const size = [box.get_width(), box.get_height()];
+            if (size[0] === this.allocatedWidth && size[1] === this.allocatedHeight)
+                return;
+            [this.allocatedWidth, this.allocatedHeight] = size;
+            this.relayoutSource ||= GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                this.relayoutSource = 0;
+                this.paint(true);
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+        this.actor.connect('destroy', () => {
+            if (this.relayoutSource)
+                GLib.Source.remove(this.relayoutSource);
+            this.relayoutSource = 0;
+        });
         this.configure();
     }
 
@@ -82,7 +104,6 @@ export class KaraokeView {
         this.plain = plain;
         this.trackTitle = title;
         this.lines = plain ? null : result?.timed;
-        this.heading.text = [status, title].filter(Boolean).join('  ·  ');
         this.stage.visible = Boolean(this.lines?.length);
         this.scroll.visible = !this.stage.visible;
         this.stateIcon.visible = !this.stage.visible && !result?.plain;
@@ -145,6 +166,9 @@ export class KaraokeView {
             const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
             const heights = [];
             const visible = [];
+            // Setting row text queues a relayout, so has_allocation() turned false mid-loop
+            // and rows were measured unwrapped; use the last allocated width instead.
+            const width = Math.max(1, this.allocatedWidth || this.stage.width);
             for (let index = center - 2; index <= center + 2; index++) {
                 const row = this.rows[(index % 5 + 5) % 5];
                 const cue = this.lines[index];
@@ -153,9 +177,12 @@ export class KaraokeView {
                 if (!cue)
                     continue;
                 const selected = index === active;
-                row.style = `font-size: ${selected ? this.currentSize : this.otherSize}px; font-weight: ${selected ? 700 : 500}; color: ${selected ? this.currentColor : '#e6ebf2'};`;
+                // St's text-align would otherwise reset Pango centering on wrapped lines.
+                row.style = `font-size: ${selected ? this.currentSize : this.otherSize}px; font-weight: ${selected ? 800 : 500}; color: ${selected ? this.currentColor : '#e6ebf2'}; text-align: center;`;
                 row.text = cue.text || '♪';
-                heights[index - center + 2] = row.get_preferred_height(Math.max(1, this.stage.width))[1];
+                // Measure with this row's new font, not the role it had before recycling.
+                row.ensure_style();
+                heights[index - center + 2] = row.get_preferred_height(width)[1];
                 visible.push([index, row, selected]);
             }
             for (const [index, row, selected] of visible) {

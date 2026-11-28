@@ -57,6 +57,9 @@ export async function run() {
     const extension = manager.lookup(UUID);
     const settings = extension.stateObj.getSettings();
     const island = () => find(Main.panel, 'nova-island');
+    const clockMapped = () => island()?.get_child().get_children().some(child =>
+        child.mapped && child.has_style_class_name?.('nova-island-compact'));
+    const miniTitle = () => find(island(), 'nova-media-mini-title');
     const preview = () => find(Main.uiGroup, 'nova-island-preview');
     const inPreview = name => find(preview(), `nova-media-${name}`);
     const seat = global.stage.get_context().get_backend().get_default_seat();
@@ -86,16 +89,29 @@ export async function run() {
     settings.set_boolean('reduce-motion', true);
     settings.set_boolean('track-previews', true);
     settings.set_int('track-preview-duration', 1200);
-    settings.set_string('default-expanded-module', 'clock');
+    settings.set_string('default-expanded-module', 'auto');
 
     const [descriptor, path] = GLib.file_open_tmp('nova-shell-cover-XXXXXX');
     GLib.close(descriptor);
     GLib.file_set_contents(path, GLib.base64_decode(PNG));
-    const first = await mockPlayer('NovaOne', 'NOVA One', {playing: true});
+    const first = await mockPlayer('NovaOne', 'NOVA One');
     let second;
     try {
-        await waitFor(() => find(island(), 'nova-media-mini-title')?.mapped, 'compact media');
-        assert(find(island(), 'nova-media-mini-title').text === 'NOVA One first track', 'Compact title missing');
+        await waitFor(() => find(preview(), 'nova-module-media').visible, 'paused player discovered');
+        assert(clockMapped(), 'A paused player displaced the compact clock');
+        first.set('PlaybackStatus', 'Playing');
+        await waitFor(() => miniTitle()?.mapped && miniTitle().text === 'NOVA One first track', 'compact media');
+        await click(island());
+        await waitFor(() => preview().mapped && !inPreview('title').mapped, 'automatic Time while media is playing');
+        await click(island());
+        await waitFor(() => !preview().mapped, 'close automatic Time');
+        first.changeTrack('Track paused during preview');
+        await waitFor(() => preview().mapped && inPreview('title').text === 'Track paused during preview',
+            'automatic preview before pause');
+        first.set('PlaybackStatus', 'Paused');
+        await waitFor(() => clockMapped() && !preview().mapped, 'automatic preview closes on pause');
+        first.set('PlaybackStatus', 'Playing');
+        await waitFor(() => miniTitle().mapped, 'compact media after resume');
         const focus = global.stage.get_key_focus();
         first.changeTrack('A fresh track from NOVA One');
         await waitFor(() => preview()?.mapped && inPreview('title').mapped &&
@@ -118,13 +134,40 @@ export async function run() {
         assert(inPreview('elapsed').text !== '' && inPreview('duration').text === '2:00', 'Missing playback time');
         await click(inPreview('toggle'));
         await waitFor(() => first.calls.includes('Pause'), 'pointer playback controls');
-        assert(preview().mapped, 'Playback state update hid the pinned preview');
+        await waitFor(clockMapped, 'clock after pausing from the media tab');
+        assert(preview().mapped, 'Playback state update hid the preview while interacting');
+        pointer.notify_absolute_motion(GLib.get_monotonic_time(), 40, 400);
+        await waitFor(() => !preview().mapped && clockMapped(), 'leaving a selected tab returns to the clock');
+        settings.set_string('default-expanded-module', 'auto');
+        await click(island());
+        await waitFor(() => preview().mapped && !inPreview('title').mapped, 'reopens to the automatic clock');
+        await click(island());
+        await waitFor(() => !preview().mapped, 'automatic clock preview closed');
+        settings.set_string('default-expanded-module', 'media');
+        await click(island());
+        await waitFor(() => inPreview('switch').mapped, 'explicit media default');
         await click(inPreview('switch'));
         await waitFor(() => inPreview('title').text === 'NOVA Two first track', 'manual player switch');
-        await waitFor(() => inPreview('art').content && find(island(), 'nova-media-small-art').content,
-            'local artwork loaded into both Shell surfaces');
+        await waitFor(() => inPreview('art').content, 'paused player artwork in the expanded view');
+        assert(clockMapped(), 'Selecting a paused player displaced the compact clock');
+        second.set('PlaybackStatus', 'Playing');
+        await waitFor(() => miniTitle().mapped && miniTitle().text === 'NOVA Two first track' &&
+            find(island(), 'nova-media-small-art').content, 'playing track title and artwork in the compact view');
+        second.set('PlaybackStatus', 'Paused');
+        await waitFor(clockMapped, 'compact clock after pausing a different player');
         await click(inPreview('lyrics'));
         await waitFor(() => inPreview('lyric-text')?.mapped && inPreview('lyric-text')?.text.includes('off'), 'disabled lyrics explanation');
+        assert(inPreview('lyrics-title').text === 'NOVA Two first track' &&
+            inPreview('lyrics-artist').text === 'NOVA Test Artist' &&
+            inPreview('lyrics-album').text === 'NOVA Test Album', 'Lyrics header track metadata');
+        assert(inPreview('lyrics-art').content === inPreview('art').content &&
+            inPreview('lyrics-sync').text === 'Off', 'Lyrics header artwork and status');
+        const bars = inPreview('lyrics-visualizer');
+        assert(!bars.visible && bars.get_children().length === 4, 'Lyrics visualizer while paused');
+        second.set('PlaybackStatus', 'Playing');
+        await waitFor(() => bars.mapped, 'four playing visualizer bars in lyrics view');
+        second.set('PlaybackStatus', 'Paused');
+        await waitFor(() => !bars.visible, 'lyrics visualizer hides on pause');
         await click(inPreview('lyrics'));
         const {HttpClient} = await import(extension.dir.get_child('src/media/network.js').get_uri());
         const originalGet = HttpClient.prototype.get;
@@ -140,11 +183,12 @@ export async function run() {
                 }));
             };
             settings.set_boolean('lyrics-enabled', true);
-            await waitFor(() => inPreview('lyrics').label.includes('Synced'), 'automatic lyrics before opening view');
+            await waitFor(() => inPreview('lyrics-status').text === 'Synced', 'automatic lyrics before opening view');
             await click(inPreview('lyrics'));
             await waitFor(() => inPreview('lyric-text')?.mapped && inPreview('lyric-text')?.text === 'Timed verse',
                 'timestamped line rendered');
             await waitFor(() => preview().width === 620 && preview().height === 540, 'dedicated lyrics geometry');
+            assert(inPreview('lyrics-sync').text === 'Synced', 'Lyrics header sync status');
             second.seekTo(32000000);
             await waitFor(() => inPreview('lyric-text')?.text === 'Next verse', 'synchronized lyrics follow seeking');
             settings.set_string('lyrics-mode', 'plain');
@@ -217,10 +261,13 @@ export async function run() {
         await waitFor(() => !preview().mapped && global.stage.get_key_focus() === island(),
             'Escape returns focus to the island');
         settings.set_boolean('media-enabled', false);
-        await waitFor(() => !find(island(), 'nova-media-mini-title').mapped, 'module disabled live');
-        assert(island().mapped && !inPreview('title').mapped, 'Clock did not remain available');
+        await waitFor(() => clockMapped() && !inPreview('title').mapped, 'module disabled live');
         settings.set_boolean('media-enabled', true);
-        await waitFor(() => find(island(), 'nova-media-mini-title').mapped, 'discovery restored on enable');
+        await waitFor(() => find(preview(), 'nova-module-media').visible && clockMapped(), 'paused player rediscovered on enable');
+        first.set('PlaybackStatus', 'Playing');
+        await waitFor(() => miniTitle().mapped, 'compact media restored on play');
+        first.set('PlaybackStatus', 'Stopped');
+        await waitFor(clockMapped, 'clock after stopping playback');
 
         manager.disableExtension(UUID);
         await waitFor(() => extension.state === ExtensionState.INACTIVE && !island() && !preview(), 'media actor cleanup');

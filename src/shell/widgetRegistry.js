@@ -12,13 +12,24 @@ export class WidgetRegistry {
         return this.#factories.keys();
     }
 
-    candidates(widgets, settings, view) {
+    // Manual pill selection can reach all enabled modules; per-view switches
+    // continue to govern automatic compact selection and expanded visibility.
+    candidates(widgets, settings, view, manual = false) {
         const preferred = view === 'expanded' ? settings.get('default-expanded-module', 'auto') : 'auto';
         const eligible = [...widgets].filter(([id, widget]) => widget.available !== false &&
-            settings.get(`${id}-enabled`, id === 'clock') && settings.get(`${id}-${view}`, true));
-        eligible.sort(([first], [second]) =>
-            Number(second === preferred) - Number(first === preferred) ||
-            settings.get(`${second}-priority`, 50) - settings.get(`${first}-priority`, 50));
+            settings.get(`${id}-enabled`, id === 'clock') && (manual || settings.get(`${id}-${view}`, true)));
+        const automaticPriority = ([id, widget]) => {
+            if (view === 'compact' && id === 'media' && widget.playing)
+                return 2;
+            return Number(id === 'clock');
+        };
+        eligible.sort((a, b) => {
+            const [first] = a;
+            const [second] = b;
+            return Number(second === preferred) - Number(first === preferred) ||
+                (!manual ? automaticPriority(b) - automaticPriority(a) : 0) ||
+                settings.get(`${second}-priority`, 50) - settings.get(`${first}-priority`, 50);
+        });
         return eligible;
     }
 

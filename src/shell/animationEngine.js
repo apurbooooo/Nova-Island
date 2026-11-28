@@ -34,6 +34,25 @@ export class AnimationEngine {
         this.#surface.hide();
     }
 
+    // Content-driven size changes while open (module switch, list growth).
+    resize(bounds) {
+        const surface = this.#surface;
+        if (!surface.visible)
+            return;
+        const {speed, expand} = this.#settings.motion;
+        const duration = Math.round(Math.min(expand, 260) * 100 / speed);
+        if (!motionEnabled(this.#settings) || duration === 0) {
+            surface.remove_all_transitions();
+            surface.opacity = 255;
+            surface.first_child.opacity = 255;
+            surface.set_position(bounds.x, bounds.y);
+            surface.set_size(bounds.width, bounds.height);
+            return;
+        }
+        surface.ease({...bounds, opacity: 255, duration, mode: Clutter.AnimationMode.EASE_OUT_CUBIC});
+        surface.first_child.ease({opacity: 255, duration, mode: Clutter.AnimationMode.EASE_OUT_CUBIC});
+    }
+
     present(bounds, anchorWidth, expanded, animate) {
         const surface = this.#surface;
         this.#stop();
